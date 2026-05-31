@@ -3,9 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop African Fashion | Jazy's House — Handmade Ankara, Kente & Dashiki</title>
-  <meta name="description" content="Shop African handmade fashion at Jazy's House. Authentic Ankara dresses, Kente shirts, Dashiki, Mudcloth — women, men & kids. African clothing & handmade accessories. Free UK shipping over £60.">
-  <meta name="keywords" content="African fashion shop, buy African clothes, Ankara dress, Kente shirt, Dashiki, African handmade accessories, African clothing UK, Jazy's House">
+  <title>Shop African Fashion & Superfoods | Jazy's House — Handmade Ankara, Kente, Dashiki, Hibiscus, Moringa</title>
+  <meta name="description" content="Shop African handmade fashion & superfoods at Jazy's House. Ankara dresses, Kente, Dashiki, Mudcloth — women, men & kids. African superfoods: dried hibiscus, moringa powder, baobab. African pantry essentials. Free UK shipping over £60.">
+  <meta name="keywords" content="African fashion shop, African superfoods, buy African clothes, Ankara dress, Kente shirt, Dashiki, hibiscus flowers, moringa powder, baobab powder, African handmade accessories, African clothing UK, Jazy's House">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#c0563d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jazy's House">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧡</text></svg>">
 </head>
@@ -13,7 +20,11 @@
 
 <nav class="nav">
   <div class="nav-inner">
-    <a href="index.html" class="logo"><span>Jazy's</span> House <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION</small></a>
+    <a href="index.html" class="logo" style="display:flex;align-items:center;gap:10px;">
+      <img src="images/logo.jpg" alt="Jazy's House" style="height:44px;width:auto;border-radius:6px;">
+      <span style="line-height:1.1;"><span style="font-family:var(--font-heading);font-size:1.2rem;font-weight:800;font-style:italic;color:var(--text);">Jazy's</span> <span style="font-family:var(--font-heading);font-weight:800;font-style:italic;color:var(--text);">House</span>
+      <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION & HEALTHY GOOD FOOD</small></span>
+    </a>
     <ul class="nav-links" id="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="shop.html" class="active">Shop</a></li>
@@ -46,6 +57,8 @@
     <button class="category-tab" onclick="switchCategory(this, 'men')">Men</button>
     <button class="category-tab" onclick="switchCategory(this, 'kids')">Kids</button>
     <button class="category-tab" onclick="switchCategory(this, 'accessories')">Accessories</button>
+    <button class="category-tab" onclick="switchCategory(this, 'pantry')">Pantry</button>
+    <button class="category-tab" onclick="switchCategory(this, 'home')">Home</button>
   </div>
 
   <div class="product-grid" id="product-grid"></div>
@@ -66,10 +79,10 @@
   <div class="footer-grid">
     <div class="footer-brand">
       <h3><span>Jazy's</span> House</h3>
-      <p>African fashion, handmade accessories & African food catering. From our hands to your heart. Est. 2025.</p>
+      <p>African fashion, handmade accessories & healthy African good food. From our hands to your heart. Est. 2025.</p>
     </div>
-    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html?cat=women">Women</a></li><li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=kids">Kids</a></li><li><a href="shop.html?cat=accessories">Accessories</a></li></ul></div>
-    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="catering.html">Catering</a></li><li><a href="#">Contact</a></li><li><a href="#">FAQ</a></li></ul></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html?cat=women">Women</a></li><li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=kids">Kids</a></li><li><a href="shop.html?cat=accessories">Accessories</a></li><li><a href="shop.html?cat=pantry">Pantry</a></li><li><a href="shop.html?cat=home">Home</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="catering.html">Catering</a></li><li><a href="mailto:faye.dienaba@yahoo.com">faye.dienaba@yahoo.com</a></li><li><a href="tel:+818043570980">080-4357-0980</a></li></ul></div>
     <div class="footer-col"><h4>Follow</h4><ul><li><a href="https://www.instagram.com/jazy_shouse">Instagram</a></li><li><a href="https://www.tiktok.com/@africanfood6">TikTok</a></li><li><a href="#">Pinterest</a></li><li><a href="#">Facebook</a></li></ul></div>
   </div>
   <div class="footer-bottom"><p>© 2025 Jazy's House. All rights reserved. Made with love.</p></div>
@@ -80,11 +93,18 @@
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const cat = params.get('cat');
-  if (cat && ['women','men','kids','accessories'].includes(cat)) {
+  if (cat && ['women','men','kids','accessories','pantry','home'].includes(cat)) {
     const btn = document.querySelector(`[onclick*="'${cat}')"]`);
     if (btn) switchCategory(btn, cat);
   }
 });
+</script>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 </script>
 
 </body>

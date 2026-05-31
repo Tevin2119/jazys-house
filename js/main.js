@@ -7,20 +7,20 @@ const CART_KEY = 'jazyshouse_cart';
 /* ── PRODUCT CATALOG (African Handmade) ── */
 const products = [
   // WOMEN'S CLOTHING
-  { id: 'w1', name: 'Ankara Print Maxi Dress', category: 'women', price: 85, image: '👗', badge: 'BESTSELLER', badgeClass: '' },
-  { id: 'w2', name: 'Kente Wrap Skirt', category: 'women', price: 65, image: '👘', badge: null, badgeClass: '' },
-  { id: 'w3', name: 'Hand-Dyed Bogolan Top', category: 'women', price: 55, image: '👚', badge: 'NEW', badgeClass: 'new' },
-  { id: 'w4', name: 'Dashiki Tunic Dress', category: 'women', price: 70, image: '👗', badge: null, badgeClass: '' },
-  { id: 'w5', name: 'Wax Print Palazzo Pants', category: 'women', price: 60, image: '👖', badge: 'SALE', badgeClass: 'sale' },
-  { id: 'w6', name: 'Kitenge Blazer Jacket', category: 'women', price: 95, image: '🧥', badge: 'LIMITED', badgeClass: '' },
-  { id: 'w7', name: 'Aso Oke Statement Blouse', category: 'women', price: 75, image: '👔', badge: 'NEW', badgeClass: 'new' },
-  { id: 'w8', name: 'Mudcloth Print Jumpsuit', category: 'women', price: 90, image: '👗', badge: null, badgeClass: '' },
+  { id: 'w1', name: 'Ankara Print Maxi Dress', category: 'women', price: 85, image: '👗', img: 'images/dress-navy-orange.jpg', badge: 'BESTSELLER', badgeClass: '' },
+  { id: 'w2', name: 'Kente Wrap Skirt', category: 'women', price: 65, image: '👘', img: null, badge: null, badgeClass: '' },
+  { id: 'w3', name: 'Hand-Dyed Bogolan Top', category: 'women', price: 55, image: '👚', img: 'images/dress-red-pattern.jpg', badge: 'NEW', badgeClass: 'new' },
+  { id: 'w4', name: 'Dashiki Tunic Dress', category: 'women', price: 70, image: '👗', img: 'images/dashiki-casual.jpg', badge: null, badgeClass: '' },
+  { id: 'w5', name: 'Wax Print Palazzo Pants', category: 'women', price: 60, image: '👖', img: null, badge: 'SALE', badgeClass: 'sale' },
+  { id: 'w6', name: 'Kitenge Blazer Jacket', category: 'women', price: 95, image: '🧥', img: 'images/jacket-maroon-mom-child.jpg', badge: 'LIMITED', badgeClass: '' },
+  { id: 'w7', name: 'Aso Oke Statement Blouse', category: 'women', price: 75, image: '👔', img: 'images/suit-maroon-gold.jpg', badge: 'NEW', badgeClass: 'new' },
+  { id: 'w8', name: 'Mudcloth Print Jumpsuit', category: 'women', price: 90, image: '👗', img: null, badge: null, badgeClass: '' },
 
   // MEN'S CLOTHING
-  { id: 'm1', name: 'Kente Print Button-Up Shirt', category: 'men', price: 65, image: '👔', badge: 'BESTSELLER', badgeClass: '' },
-  { id: 'm2', name: 'Handwoven Agbada Set', category: 'men', price: 150, image: '🪡', badge: 'PREMIUM', badgeClass: '' },
-  { id: 'm3', name: 'Dashiki Classic Fit', category: 'men', price: 50, image: '👕', badge: null, badgeClass: '' },
-  { id: 'm4', name: 'Ankara Print Bomber Jacket', category: 'men', price: 110, image: '🧥', badge: 'NEW', badgeClass: 'new' },
+  { id: 'm1', name: 'Kente Print Button-Up Shirt', category: 'men', price: 65, image: '👔', img: 'images/mens-colorful-shirt.jpg', badge: 'BESTSELLER', badgeClass: '' },
+  { id: 'm2', name: 'Handwoven Agbada Set', category: 'men', price: 150, image: '🪡', img: null, badge: 'PREMIUM', badgeClass: '' },
+  { id: 'm3', name: 'Dashiki Classic Fit', category: 'men', price: 50, image: '👕', img: 'images/mens-jacket.jpg', badge: null, badgeClass: '' },
+  { id: 'm4', name: 'Ankara Print Bomber Jacket', category: 'men', price: 110, image: '🧥', img: 'images/jacket-yellow-blue.jpg', badge: 'NEW', badgeClass: 'new' },
   { id: 'm5', name: 'Mudcloth Cargo Trousers', category: 'men', price: 75, image: '👖', badge: null, badgeClass: '' },
   { id: 'm6', name: 'Bogolan Print Short Sleeve', category: 'men', price: 45, image: '👕', badge: 'SALE', badgeClass: 'sale' },
 
@@ -33,14 +33,43 @@ const products = [
   { id: 'k6', name: 'Baby Ankara Headwrap Set', category: 'kids', price: 22, image: '🧢', badge: null, badgeClass: '' },
 
   // HANDMADE ACCESSORIES
-  { id: 'a1', name: 'Ankara Tote Bag', category: 'accessories', price: 45, image: '👜', badge: 'BESTSELLER', badgeClass: '' },
-  { id: 'a2', name: 'Beaded Maasai Necklace', category: 'accessories', price: 38, image: '📿', badge: 'HANDMADE', badgeClass: '' },
-  { id: 'a3', name: 'Kente Print Headwrap', category: 'accessories', price: 25, image: '🧣', badge: null, badgeClass: '' },
-  { id: 'a4', name: 'Cowrie Shell Earrings', category: 'accessories', price: 30, image: '✨', badge: 'NEW', badgeClass: 'new' },
-  { id: 'a5', name: 'Handwoven Raffia Clutch', category: 'accessories', price: 55, image: '👛', badge: 'ARTISAN', badgeClass: '' },
+  { id: 'a1', name: 'Ankara Tote Bag', category: 'accessories', price: 45, image: '👜', img: 'images/dress-baskets.jpg', badge: 'BESTSELLER', badgeClass: '' },
+  { id: 'a2', name: 'Beaded Maasai Necklace', category: 'accessories', price: 38, image: '📿', img: 'images/accessories-beads.jpg', badge: 'HANDMADE', badgeClass: '' },
+  { id: 'a3', name: 'Kente Print Headwrap', category: 'accessories', price: 25, image: '🧣', img: 'images/bracelet-pink-white.jpg', badge: null, badgeClass: '' },
+  { id: 'a4', name: 'Cowrie Shell Earrings', category: 'accessories', price: 30, image: '✨', img: 'images/bracelet-purple-flower.jpg', badge: 'NEW', badgeClass: 'new' },
+  { id: 'a5', name: 'Handwoven Raffia Clutch', category: 'accessories', price: 55, image: '👛', img: 'images/beaded-keychain.jpg', badge: 'ARTISAN', badgeClass: '' },
   { id: 'a6', name: 'Brass Cuff Bracelet Set', category: 'accessories', price: 42, image: '💫', badge: null, badgeClass: '' },
   { id: 'a7', name: 'Wax Print Scrunchie Set (3)', category: 'accessories', price: 18, image: '🎀', badge: 'SALE', badgeClass: 'sale' },
   { id: 'a8', name: 'Ankara Pocket Square', category: 'accessories', price: 20, image: '🧶', badge: null, badgeClass: '' },
+  { id: 'a9', name: 'Handmade Beaded Phone Charm', category: 'accessories', price: 15, image: '📱', img: 'images/phone-charms-set.jpg', badge: 'NEW', badgeClass: 'new' },
+  { id: 'a10', name: 'Heart Bead Bracelet — Rainbow', category: 'accessories', price: 12, image: '💖', img: 'images/heart-bracelets.jpg', badge: 'CUTE', badgeClass: '' },
+  { id: 'a11', name: 'Floral Beaded Keychain', category: 'accessories', price: 10, image: '🔑', img: 'images/keychain-floral.jpg', badge: 'HANDMADE', badgeClass: '' },
+
+  // AFRICAN SUPERFOODS / PANTRY
+  { id: 'p1', name: 'Dried Hibiscus Flowers (Zobo)', category: 'pantry', price: 12, image: '🌺', img: 'images/hibiscus-tea-packaging.jpg', badge: 'BESTSELLER', badgeClass: '' },
+  { id: 'p2', name: 'Organic Moringa Powder', category: 'pantry', price: 15, image: '🌿', img: 'images/moringa-powder-packaging.jpg', badge: 'SUPERFOOD', badgeClass: 'new' },
+  { id: 'p3', name: 'Pure Baobab Powder', category: 'pantry', price: 16, image: '🫙', img: 'images/baobab-powder-packaging.jpg', badge: 'NEW', badgeClass: 'new' },
+  { id: 'p4', name: 'Hibiscus & Ginger Tea Blend', category: 'pantry', price: 10, image: '🍵', badge: null, badgeClass: '' },
+  { id: 'p5', name: 'Moringa & Baobab Smoothie Mix', category: 'pantry', price: 18, image: '🥤', badge: 'IMMUNE', badgeClass: '' },
+  { id: 'p6', name: 'African Superfood Bundle (3-Pack)', category: 'pantry', price: 38, image: '🎁', badge: 'BEST VALUE', badgeClass: 'sale' },
+  { id: 'p7', name: 'Café Touba — Senegalese Spiced Coffee', category: 'pantry', price: 14, image: '☕', img: 'images/cafe-touba-packaging.jpg', badge: 'ARTISAN', badgeClass: '' },
+  { id: 'p8', name: 'Baobab Oil — 100% Organic (Dropper)', category: 'pantry', price: 22, image: '✨', img: 'images/baobab-oil-dropper.jpg', badge: '100% BIO', badgeClass: 'new' },
+  { id: 'p9', name: 'Baobab Oil — Body & Face (Spray)', category: 'pantry', price: 18, image: '💫', img: 'images/baobab-oil-spray.jpg', badge: 'NEW', badgeClass: 'new' },
+
+  // HOME DÉCOR — African Textiles (Handmade)
+  { id: 'h1', name: 'Handmade Navy Geo-Pattern Pillow', category: 'home', price: 35, image: '🛋️', img: 'images/pillow-navy-geo.jpg', badge: 'HANDMADE', badgeClass: '' },
+  { id: 'h2', name: 'Handmade Cream & Black Stripe Pillow', category: 'home', price: 32, image: '🛋️', img: 'images/pillow-cream-stripe.jpg', badge: 'HANDMADE', badgeClass: '' },
+  { id: 'h3', name: 'Handmade Maroon Striped Pillow', category: 'home', price: 30, image: '🛋️', img: 'images/pillow-maroon-stripe.jpg', badge: 'HANDMADE', badgeClass: '' },
+  { id: 'h4', name: 'Handmade Green Gingham Pillow', category: 'home', price: 28, image: '🛋️', img: 'images/pillow-green-gingham.jpg', badge: 'HANDMADE', badgeClass: '' },
+  { id: 'h5', name: 'Handmade Stripe Bow-Accent Pillow', category: 'home', price: 34, image: '🛋️', img: 'images/pillow-stripe-bow.jpg', badge: 'HANDMADE', badgeClass: '' },
+  { id: 'h6', name: 'Handmade African Woven Fan', category: 'home', price: 130, image: '🪭', img: 'images/fan-woven.jpg', badge: 'ARTISAN', badgeClass: '' },
+  { id: 'h7', name: 'Decorative Storage Box — Small', category: 'home', price: 22, image: '📦', img: 'images/box-decorative-1.jpg', badge: 'HANDMADE', badgeClass: '' },
+  { id: 'h8', name: 'Decorative Storage Box — Medium', category: 'home', price: 28, image: '📦', img: 'images/box-decorative-2.jpg', badge: 'HANDMADE', badgeClass: '' },
+  { id: 'h9', name: 'Decorative Storage Box — Large', category: 'home', price: 35, image: '📦', img: 'images/box-decorative-3.jpg', badge: 'HANDMADE', badgeClass: '' },
+  { id: 'h10', name: 'Hand-Carved African Wood Statue — Small', category: 'home', price: 26, image: '🪵', img: 'images/statue-wood-1.jpg', badge: 'ARTISAN', badgeClass: '' },
+  { id: 'h11', name: 'Hand-Carved African Wood Statue — Medium', category: 'home', price: 35, image: '🪵', img: 'images/statue-wood-2.jpg', badge: 'ARTISAN', badgeClass: '' },
+  { id: 'h12', name: 'Hand-Carved African Wood Statue — Large', category: 'home', price: 48, image: '🪵', img: 'images/statue-wood-3.jpg', badge: 'ARTISAN', badgeClass: 'new' },
+  { id: 'h13', name: 'Hand-Carved African Wood Figure — Grand', category: 'home', price: 58, image: '🪵', img: 'images/statue-wood-4.jpg', badge: 'PREMIUM', badgeClass: '' },
 ];
 
 /* ── CATERING MENU (African Cuisine) ── */
@@ -112,7 +141,7 @@ function renderProducts(filter = 'all') {
   grid.innerHTML = filtered.map(p => `
     <div class="product-card fade-up">
       <div class="product-image">
-        ${p.image}
+        ${p.img ? `<img src="${p.img}" alt="${p.name}" loading="lazy">` : p.image}
         ${p.badge ? `<span class="product-badge ${p.badgeClass}">${p.badge}</span>` : ''}
       </div>
       <div class="product-info">
@@ -152,9 +181,12 @@ function renderCart() {
     totalEl.textContent = '£0';
     return;
   }
-  itemsEl.innerHTML = cart.map(item => `
+  itemsEl.innerHTML = cart.map(item => {
+    const product = products.find(p => p.id === item.id);
+    const itemImg = (product && product.img) ? `<img src="${product.img}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;">` : item.image;
+    return `
     <div class="cart-item">
-      <div class="cart-item-img">${item.image}</div>
+      <div class="cart-item-img">${itemImg}</div>
       <div class="cart-item-details">
         <h4>${item.name}</h4>
         <div class="item-price">£${item.price} × ${item.qty} = £${item.price * item.qty}</div>
@@ -166,7 +198,7 @@ function renderCart() {
         </div>
       </div>
     </div>
-  `).join('');
+  `;}).join('');
   totalEl.textContent = `£${cartTotal()}`;
 }
 

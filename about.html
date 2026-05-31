@@ -6,6 +6,13 @@
   <title>About | Jazy's House — African Fashion & Food, Handmade with Love</title>
   <meta name="description" content="About Jazy's House — your home for African handmade fashion & authentic African catering. Shop Ankara, Kente, Dashiki. Book African food for events. Crafted with love, rooted in African culture.">
   <meta name="keywords" content="African fashion brand, African handmade, about Jazy's House, African clothing brand, African catering company">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#c0563d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jazy's House">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧡</text></svg>">
 </head>
@@ -13,7 +20,11 @@
 
 <nav class="nav">
   <div class="nav-inner">
-    <a href="index.html" class="logo"><span>Jazy's</span> House <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION</small></a>
+    <a href="index.html" class="logo" style="display:flex;align-items:center;gap:10px;">
+      <img src="images/logo.jpg" alt="Jazy's House" style="height:44px;width:auto;border-radius:6px;">
+      <span style="line-height:1.1;"><span style="font-family:var(--font-heading);font-size:1.2rem;font-weight:800;font-style:italic;color:var(--text);">Jazy's</span> <span style="font-family:var(--font-heading);font-weight:800;font-style:italic;color:var(--text);">House</span>
+      <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION & HEALTHY GOOD FOOD</small></span>
+    </a>
     <ul class="nav-links" id="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="shop.html">Shop</a></li>
@@ -49,13 +60,12 @@
 <!-- ABOUT CONTENT -->
 <section class="section">
   <div class="about-grid">
-    <div class="about-visual">🌍</div>
+    <div class="about-visual"><img src="images/chef-dienaba.jpg" alt="Chef Dienaba — Jazy's House" style="width:100%;height:100%;object-fit:cover;"></div>
     <div class="about-text">
       <div class="section-label">The Vision</div>
       <h2>More Than a Brand — A Heritage</h2>
       <p>Jazy's House was born from a simple truth: <strong>African craft is world-class.</strong> Our fabrics tell stories. Our food brings people together. For too long, the world has slept on what the continent has to offer.</p>
-      <p>We're here to change that — one Ankara dress, one plate of jollof, one handmade accessory at a time.</p>
-      <p>Every piece in our collection is handmade. Every dish on our catering menu comes from recipes passed down through generations. We don't cut corners — we pour heart into everything we do.</p>
+      <p>Every piece in our collection is handmade. Every dish on our catering menu comes from recipes passed down through generations — <strong>prepared by our Senegalese chef</strong>. We don't cut corners — we pour heart into everything we do.</p>
       <p><strong>Welcome to Jazy's House. You're family now.</strong> 🧡</p>
     </div>
   </div>
@@ -105,15 +115,22 @@
 
 <footer class="footer">
   <div class="footer-grid">
-    <div class="footer-brand"><h3><span>Jazy's</span> House</h3><p>African fashion, handmade accessories & African food catering. From our hands to your heart. Est. 2025.</p></div>
-    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html?cat=women">Women</a></li><li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=kids">Kids</a></li><li><a href="shop.html?cat=accessories">Accessories</a></li></ul></div>
-    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="catering.html">Catering</a></li><li><a href="#">Contact</a></li><li><a href="#">FAQ</a></li></ul></div>
+    <div class="footer-brand"><h3><span>Jazy's</span> House</h3><p>African fashion, handmade accessories & healthy African good food. From our hands to your heart. Est. 2025.</p></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html?cat=women">Women</a></li><li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=kids">Kids</a></li><li><a href="shop.html?cat=accessories">Accessories</a></li><li><a href="shop.html?cat=pantry">Pantry</a></li><li><a href="shop.html?cat=home">Home</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="catering.html">Catering</a></li><li><a href="mailto:faye.dienaba@yahoo.com">faye.dienaba@yahoo.com</a></li><li><a href="tel:+818043570980">080-4357-0980</a></li></ul></div>
     <div class="footer-col"><h4>Follow</h4><ul><li><a href="https://www.instagram.com/jazy_shouse">Instagram</a></li><li><a href="https://www.tiktok.com/@africanfood6">TikTok</a></li><li><a href="#">Pinterest</a></li><li><a href="#">Facebook</a></li></ul></div>
   </div>
   <div class="footer-bottom"><p>© 2025 Jazy's House. All rights reserved. Made with love.</p></div>
 </footer>
 
 <script src="js/main.js"></script>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
 
 </body>
 </html>

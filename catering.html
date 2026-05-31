@@ -6,6 +6,13 @@
   <title>African Catering | Jazy's House — Authentic African Food for Events</title>
   <meta name="description" content="African catering by Jazy's House. Authentic African food for events — jollof rice, suya, braai, puff-puff, West African banquet. African cuisine catering, parties & weddings. Book online.">
   <meta name="keywords" content="African catering, African food catering, jollof rice catering, African party food, West African food, African cuisine, event catering, Jazy's House">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#c0563d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jazy's House">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧡</text></svg>">
 </head>
@@ -13,7 +20,11 @@
 
 <nav class="nav">
   <div class="nav-inner">
-    <a href="index.html" class="logo"><span>Jazy's</span> House <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION</small></a>
+    <a href="index.html" class="logo" style="display:flex;align-items:center;gap:10px;">
+      <img src="images/logo.jpg" alt="Jazy's House" style="height:44px;width:auto;border-radius:6px;">
+      <span style="line-height:1.1;"><span style="font-family:var(--font-heading);font-size:1.2rem;font-weight:800;font-style:italic;color:var(--text);">Jazy's</span> <span style="font-family:var(--font-heading);font-weight:800;font-style:italic;color:var(--text);">House</span>
+      <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION & HEALTHY GOOD FOOD</small></span>
+    </a>
     <ul class="nav-links" id="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="shop.html">Shop</a></li>
@@ -49,12 +60,47 @@
   </div>
 </section>
 
+<!-- FLYER SHOWCASE -->
+<section class="section" style="text-align:center;">
+  <div style="max-width:500px;margin:0 auto;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);">
+    <img src="images/restaurant-flyer.jpg" alt="Jazy's House — Senegalese Cuisine Flyer" style="width:100%;" loading="lazy">
+  </div>
+  <p style="color:var(--text-muted);font-size:0.85rem;margin-top:1rem;">🇸🇳 Authentic Senegalese cuisine — made by a Senegalese chef</p>
+</section>
+
+<!-- MENU SHOWCASE -->
+<section class="section" style="text-align:center;">
+  <div class="section-label">Our Menu</div>
+  <h2 class="section-title">Senegalese Food & Drink</h2>
+  <p class="section-subtitle" style="margin:0 auto 2rem;">Authentic West African cuisine — from our kitchen to your event.</p>
+  <div style="max-width:400px;margin:0 auto;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);">
+    <img src="images/senegalese-menu.jpg" alt="Senegalese Food Menu — Chicken Yassa, Fataya, Mafé, Bissap, Beignet" style="width:100%;" loading="lazy">
+  </div>
+  <p style="color:var(--text-muted);font-size:0.8rem;margin-top:1rem;">Chicken Yassa · Fataya · Mafé · Bissap Juice · Beignet</p>
+</section>
+
 <!-- CATERING MENU -->
 <section class="section" id="catering-menu">
   <div class="section-label">Our Menu</div>
   <h2 class="section-title">Catering Packages</h2>
   <p class="section-subtitle">Every menu is customizable. Dietary needs? Halal? Vegetarian? We've got you.</p>
   <div class="catering-grid" id="catering-grid"></div>
+</section>
+
+<!-- CHEF SECTION -->
+<section style="background:var(--bg-warm);padding:5rem 2rem;text-align:center;">
+  <div style="max-width:900px;margin:0 auto;">
+    <div class="section-label">Meet the Chef</div>
+    <h2 class="section-title">Authentic Senegalese Cuisine</h2>
+    <p class="section-subtitle" style="margin:0 auto 2rem;">Every dish crafted by our Senegalese chef — real recipes, real flavors, real love.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;max-width:700px;margin:0 auto;">
+      <img src="images/chef-dienaba-2.jpg" alt="Chef at Jazy's House" style="width:100%;border-radius:var(--radius);box-shadow:var(--shadow-lg);">
+      <div style="text-align:left;">
+        <p style="color:var(--text);font-size:1rem;line-height:1.8;">🇸🇳 From Dakar to your table — <strong>Chef Dienaba</strong> brings the true taste of Senegal. Chicken Yassa, Mafé, Fataya, Thieboudienne… every dish is a journey home.</p>
+        <p style="color:var(--text-muted);font-size:0.9rem;">📞 080-4357-0980<br>📧 faye.dienaba@yahoo.com</p>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- HOW IT WORKS -->
@@ -113,9 +159,9 @@
 
 <footer class="footer">
   <div class="footer-grid">
-    <div class="footer-brand"><h3><span>Jazy's</span> House</h3><p>African fashion, handmade accessories & African food catering. From our hands to your heart. Est. 2025.</p></div>
-    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html?cat=women">Women</a></li><li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=kids">Kids</a></li><li><a href="shop.html?cat=accessories">Accessories</a></li></ul></div>
-    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="catering.html">Catering</a></li><li><a href="#">Contact</a></li><li><a href="#">FAQ</a></li></ul></div>
+    <div class="footer-brand"><h3><span>Jazy's</span> House</h3><p>African fashion, handmade accessories & healthy African good food. From our hands to your heart. Est. 2025.</p></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html?cat=women">Women</a></li><li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=kids">Kids</a></li><li><a href="shop.html?cat=accessories">Accessories</a></li><li><a href="shop.html?cat=pantry">Pantry</a></li><li><a href="shop.html?cat=home">Home</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="catering.html">Catering</a></li><li><a href="mailto:faye.dienaba@yahoo.com">faye.dienaba@yahoo.com</a></li><li><a href="tel:+818043570980">080-4357-0980</a></li></ul></div>
     <div class="footer-col"><h4>Follow</h4><ul><li><a href="https://www.instagram.com/jazy_shouse">Instagram</a></li><li><a href="https://www.tiktok.com/@africanfood6">TikTok</a></li><li><a href="#">Pinterest</a></li><li><a href="#">Facebook</a></li></ul></div>
   </div>
   <div class="footer-bottom"><p>© 2025 Jazy's House. All rights reserved. Made with love.</p></div>
@@ -127,6 +173,13 @@ function handleCateringInquiry(event) {
   event.preventDefault();
   showToast('Inquiry sent! We\'ll get back to you within 24h 🧡');
   event.target.reset();
+}
+</script>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 </script>
 

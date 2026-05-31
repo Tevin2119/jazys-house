@@ -3,9 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jazy's House | African Handmade Fashion & Authentic African Catering</title>
-  <meta name="description" content="Jazy's House — African handmade clothing & accessories. Shop authentic Ankara, Kente, Dashiki fashion for women, men & kids. Plus African food catering: jollof, suya, braai. African fashion, African food, one home.">
-  <meta name="keywords" content="African fashion, African clothing, handmade African accessories, Ankara dresses, Kente fabric, Dashiki, African catering, African food, jollof rice, African handmade, Jazy's House">
+  <title>Jazy's House | African Handmade Fashion, Superfoods & Authentic African Catering</title>
+  <meta name="description" content="Jazy's House — African handmade clothing & accessories. Shop Ankara, Kente, Dashiki. African superfoods: hibiscus, moringa, baobab. African food catering: jollof, suya, braai. African fashion, African superfoods, African food, one home.">
+  <meta name="keywords" content="African fashion, African clothing, African superfoods, hibiscus flowers, moringa powder, baobab powder, handmade African accessories, Ankara dresses, Kente fabric, Dashiki, African catering, African food, jollof rice, Jazy's House">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#c0563d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jazy's House">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧡</text></svg>">
 </head>
@@ -14,7 +21,11 @@
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-inner">
-    <a href="index.html" class="logo"><span>Jazy's</span> House <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION</small></a>
+    <a href="index.html" class="logo" style="display:flex;align-items:center;gap:10px;">
+      <img src="images/logo.jpg" alt="Jazy's House" style="height:44px;width:auto;border-radius:6px;">
+      <span style="line-height:1.1;"><span style="font-family:var(--font-heading);font-size:1.2rem;font-weight:800;font-style:italic;color:var(--text);">Jazy's</span> <span style="font-family:var(--font-heading);font-weight:800;font-style:italic;color:var(--text);">House</span>
+      <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION & HEALTHY GOOD FOOD</small></span>
+    </a>
     <ul class="nav-links" id="nav-links">
       <li><a href="index.html" class="active">Home</a></li>
       <li><a href="shop.html">Shop</a></li>
@@ -44,11 +55,12 @@
 <section class="hero">
   <div class="hero-content">
     <div class="hero-text">
-      <div class="hero-badge">Handmade with Love · Est. 2025</div>
+      <div class="hero-badge">African Fashion & Healthy Good Food · Est. 2025</div>
       <h1>African Fashion<br><span class="accent">Handmade with Soul</span></h1>
-      <p>Jazy's House — your home for African handmade fashion & authentic African catering. Vibrant Ankara, Kente, Dashiki. Worn with pride, made with love.</p>
+      <p>Jazy's House — your home for African handmade fashion, pure African superfoods & authentic African catering. Vibrant Ankara, Kente, Dashiki. Hibiscus, moringa, baobab. Worn with pride, made with love.</p>
       <div class="hero-cta">
-        <a href="shop.html" class="btn btn-primary">Shop the Collection</a>
+        <a href="shop.html" class="btn btn-primary">Shop Fashion</a>
+        <a href="shop.html?cat=pantry" class="btn btn-gold">Shop Superfoods</a>
         <a href="catering.html" class="btn btn-outline">Book Catering</a>
       </div>
     </div>
@@ -104,6 +116,39 @@
   </div>
 </section>
 
+<!-- PANTRY TEASER -->
+<section class="section">
+  <div class="section-label">Pantry</div>
+  <h2 class="section-title">African Superfoods</h2>
+  <p class="section-subtitle">100% pure, natural African superfoods. Dried hibiscus flowers, organic moringa, baobab powder — straight from the source.</p>
+  <div class="product-grid" id="pantry-grid"></div>
+  <div style="text-align:center;margin-top:3rem;">
+    <a href="shop.html?cat=pantry" class="btn btn-gold">Shop Superfoods →</a>
+  </div>
+</section>
+
+<!-- LIFESTYLE GALLERY -->
+<section style="background:var(--bg-warm);padding:6rem 2rem;">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="section-label">Lookbook</div>
+    <h2 class="section-title">African Fashion, Alive</h2>
+    <p class="section-subtitle">Real people. Real style. See how Jazy's House looks in the wild.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;margin-top:2rem;">
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/dress-navy-orange.jpg" alt="Ankara Maxi Dress" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/suit-maroon-gold.jpg" alt="Maroon Gold Suit" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/mens-colorful-shirt.jpg" alt="Kente Print Shirt" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/dashiki-casual.jpg" alt="Dashiki Style" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/jacket-yellow-blue.jpg" alt="Bomber Jacket" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/jacket-maroon-mom-child.jpg" alt="Mom & Child" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/dress-baskets.jpg" alt="Handwoven Accessories" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/phone-charms-set.jpg" alt="Beaded Phone Charms" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/heart-bracelets.jpg" alt="Heart Bracelets" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/keychain-floral.jpg" alt="Floral Keychain" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+      <div style="aspect-ratio:3/4;border-radius:var(--radius);overflow:hidden;"><img src="images/dress-red-pattern.jpg" alt="Bogolan Dress" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
 <!-- NEWSLETTER -->
 <section class="section">
   <div class="newsletter">
@@ -127,7 +172,7 @@
     <div style="font-family:monospace;font-size:1.1rem;color:var(--accent);font-weight:700;">
       jazyshouse-african.com
     </div>
-    <p style="color:var(--text-light);font-size:0.75rem;margin-top:0.75rem;">African fashion · African catering · African handmade</p>
+    <p style="color:var(--text-light);font-size:0.75rem;margin-top:0.75rem;">African fashion · African superfoods · African healthy good food</p>
   </div>
 </section>
 
@@ -136,7 +181,7 @@
   <div class="footer-grid">
     <div class="footer-brand">
       <h3><span>Jazy's</span> House</h3>
-      <p>African fashion, handmade accessories & African food catering. From our hands to your heart. Est. 2025.</p>
+      <p>African fashion, handmade accessories & healthy African good food. From our hands to your heart. Est. 2025.</p>
     </div>
     <div class="footer-col">
       <h4>Shop</h4>
@@ -145,6 +190,8 @@
         <li><a href="shop.html?cat=men">Men</a></li>
         <li><a href="shop.html?cat=kids">Kids</a></li>
         <li><a href="shop.html?cat=accessories">Accessories</a></li>
+        <li><a href="shop.html?cat=pantry">Pantry</a></li>
+        <li><a href="shop.html?cat=home">Home</a></li>
       </ul>
     </div>
     <div class="footer-col">
@@ -152,8 +199,8 @@
       <ul>
         <li><a href="about.html">Our Story</a></li>
         <li><a href="catering.html">Catering</a></li>
-        <li><a href="#">Contact</a></li>
-        <li><a href="#">FAQ</a></li>
+        <li><a href="mailto:faye.dienaba@yahoo.com">faye.dienaba@yahoo.com</a></li>
+        <li><a href="tel:+818043570980">080-4357-0980</a></li>
       </ul>
     </div>
     <div class="footer-col">
@@ -180,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fg.innerHTML = products.slice(0, 4).map(p => `
       <div class="product-card fade-up">
         <div class="product-image">
-          ${p.image}
+          ${p.img ? `<img src="${p.img}" alt="${p.name}" loading="lazy">` : p.image}
           ${p.badge ? `<span class="product-badge ${p.badgeClass}">${p.badge}</span>` : ''}
         </div>
         <div class="product-info">
@@ -206,7 +253,32 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `).join('');
   }
+  // Pantry teaser
+  const pg = document.getElementById('pantry-grid');
+  if (pg) {
+    pg.innerHTML = products.filter(p => p.category === 'pantry').slice(0, 4).map(p => `
+      <div class="product-card fade-up">
+        <div class="product-image">
+          ${p.img ? `<img src="${p.img}" alt="${p.name}" loading="lazy">` : p.image}
+          ${p.badge ? `<span class="product-badge ${p.badgeClass}">${p.badge}</span>` : ''}
+        </div>
+        <div class="product-info">
+          <div class="product-category">pantry</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">£${p.price}</div>
+          <button class="add-to-cart" onclick="addToCart('${p.id}')">Add to Cart</button>
+        </div>
+      </div>
+    `).join('');
+  }
 });
+</script>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 </script>
 
 </body>
