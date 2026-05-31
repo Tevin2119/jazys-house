@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>African Catering | Jazy's House — Authentic African Food for Events</title>
+  <meta name="description" content="African catering by Jazy's House. Authentic African food for events — jollof rice, suya, braai, puff-puff, West African banquet. African cuisine catering, parties & weddings. Book online.">
+  <meta name="keywords" content="African catering, African food catering, jollof rice catering, African party food, West African food, African cuisine, event catering, Jazy's House">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧡</text></svg>">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span>Jazy's</span> House <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION</small></a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="catering.html" class="active">Catering</a></li>
+      <li><a href="about.html">Our Story</a></li>
+      <li><button class="cart-icon" onclick="openCart()" aria-label="Cart">🛒<span class="cart-count">0</span></button></li>
+    </ul>
+    <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<div class="cart-overlay" id="cart-overlay"></div>
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-header"><h3>Your Cart</h3><button class="cart-close" onclick="closeCart()">✕</button></div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total">Total: <span id="cart-total">£0</span></div>
+    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+  </div>
+</div>
+
+<!-- CATERING HERO -->
+<section class="catering-hero" style="padding:120px 2rem 4rem;text-align:center;">
+  <div style="max-width:800px;margin:0 auto;position:relative;z-index:1;">
+    <div class="hero-badge">Catering</div>
+    <h1 style="font-family:var(--font-heading);font-size:clamp(2.5rem,6vw,4rem);font-weight:800;font-style:italic;line-height:1.1;margin-bottom:1rem;color:var(--text);">
+      The Taste of<br>Home
+    </h1>
+    <p style="color:var(--text-muted);font-size:1.15rem;max-width:550px;margin:0 auto 2rem;">
+      Authentic African cuisine, made with love. From intimate dinners to grand celebrations — we bring the flavors of the continent to your table.
+    </p>
+    <a href="#catering-menu" class="btn btn-primary">View Menu</a>
+  </div>
+</section>
+
+<!-- CATERING MENU -->
+<section class="section" id="catering-menu">
+  <div class="section-label">Our Menu</div>
+  <h2 class="section-title">Catering Packages</h2>
+  <p class="section-subtitle">Every menu is customizable. Dietary needs? Halal? Vegetarian? We've got you.</p>
+  <div class="catering-grid" id="catering-grid"></div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="background:var(--bg-warm);padding:6rem 2rem;">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Your Event, Our Kitchen</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;margin-top:3rem;">
+      <div style="text-align:center;padding:2.5rem 2rem;background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);">
+        <div style="font-size:3rem;margin-bottom:1rem;">📋</div>
+        <h3 style="font-family:var(--font-heading);font-weight:700;font-style:italic;margin-bottom:0.75rem;">1. Tell Us Your Vision</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem;">Fill out the form — date, guests, vibe. We respond within 24 hours.</p>
+      </div>
+      <div style="text-align:center;padding:2.5rem 2rem;background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);">
+        <div style="font-size:3rem;margin-bottom:1rem;">🍲</div>
+        <h3 style="font-family:var(--font-heading);font-weight:700;font-style:italic;margin-bottom:0.75rem;">2. We Craft Your Menu</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem;">Custom menu designed around your taste, budget, and dietary needs.</p>
+      </div>
+      <div style="text-align:center;padding:2.5rem 2rem;background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);">
+        <div style="font-size:3rem;margin-bottom:1rem;">🎉</div>
+        <h3 style="font-family:var(--font-heading);font-weight:700;font-style:italic;margin-bottom:0.75rem;">3. We Bring the Feast</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem;">Our team arrives, sets up, serves, and cleans. You enjoy your guests.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INQUIRY FORM -->
+<section class="section">
+  <div class="section-label">Get in Touch</div>
+  <h2 class="section-title">Book Your Event</h2>
+  <p class="section-subtitle">Tell us about your event and we'll create the perfect African feast.</p>
+
+  <form style="max-width:620px;margin-top:2rem;" onsubmit="handleCateringInquiry(event)">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <input type="text" placeholder="Your Name" required class="form-input">
+      <input type="email" placeholder="Email" required class="form-input">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <input type="date" required class="form-input">
+      <input type="number" placeholder="Number of Guests" min="1" required class="form-input">
+    </div>
+    <select required class="form-input" style="margin-bottom:1rem;">
+      <option value="">Select a Package (Optional)</option>
+      <option value="platter">Taste of Africa Platter</option>
+      <option value="braai">Braai Experience</option>
+      <option value="west">West African Banquet</option>
+      <option value="east">East African Feast</option>
+      <option value="dessert">African Dessert Table</option>
+      <option value="full">Full Event Catering</option>
+    </select>
+    <textarea placeholder="Tell us about your event — venue, theme, dietary needs, anything else…" rows="5" required class="form-input" style="margin-bottom:1rem;"></textarea>
+    <button type="submit" class="btn btn-primary" style="width:100%;">Send Inquiry</button>
+  </form>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand"><h3><span>Jazy's</span> House</h3><p>African fashion, handmade accessories & African food catering. From our hands to your heart. Est. 2025.</p></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html?cat=women">Women</a></li><li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=kids">Kids</a></li><li><a href="shop.html?cat=accessories">Accessories</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="catering.html">Catering</a></li><li><a href="#">Contact</a></li><li><a href="#">FAQ</a></li></ul></div>
+    <div class="footer-col"><h4>Follow</h4><ul><li><a href="https://www.instagram.com/jazy_shouse">Instagram</a></li><li><a href="https://www.tiktok.com/@africanfood6">TikTok</a></li><li><a href="#">Pinterest</a></li><li><a href="#">Facebook</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© 2025 Jazy's House. All rights reserved. Made with love.</p></div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+function handleCateringInquiry(event) {
+  event.preventDefault();
+  showToast('Inquiry sent! We\'ll get back to you within 24h 🧡');
+  event.target.reset();
+}
+</script>
+
+</body>
+</html>

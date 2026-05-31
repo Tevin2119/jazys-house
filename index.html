@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jazy's House | African Handmade Fashion & Authentic African Catering</title>
+  <meta name="description" content="Jazy's House — African handmade clothing & accessories. Shop authentic Ankara, Kente, Dashiki fashion for women, men & kids. Plus African food catering: jollof, suya, braai. African fashion, African food, one home.">
+  <meta name="keywords" content="African fashion, African clothing, handmade African accessories, Ankara dresses, Kente fabric, Dashiki, African catering, African food, jollof rice, African handmade, Jazy's House">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧡</text></svg>">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span>Jazy's</span> House <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION</small></a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="catering.html">Catering</a></li>
+      <li><a href="about.html">Our Story</a></li>
+      <li><button class="cart-icon" onclick="openCart()" aria-label="Cart">🛒<span class="cart-count">0</span></button></li>
+    </ul>
+    <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<!-- CART OVERLAY -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-header">
+    <h3>Your Cart</h3>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total">Total: <span id="cart-total">£0</span></div>
+    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge">Handmade with Love · Est. 2025</div>
+      <h1>African Fashion<br><span class="accent">Handmade with Soul</span></h1>
+      <p>Jazy's House — your home for African handmade fashion & authentic African catering. Vibrant Ankara, Kente, Dashiki. Worn with pride, made with love.</p>
+      <div class="hero-cta">
+        <a href="shop.html" class="btn btn-primary">Shop the Collection</a>
+        <a href="catering.html" class="btn btn-outline">Book Catering</a>
+      </div>
+    </div>
+    <div class="hero-visual">🌍</div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<div class="benefits">
+  <div class="benefit-item">
+    <div class="icon">🤲</div>
+    <h4>Handmade</h4>
+    <p>Every piece crafted with care</p>
+  </div>
+  <div class="benefit-item">
+    <div class="icon">🚚</div>
+    <h4>Free Shipping</h4>
+    <p>On orders over £60</p>
+  </div>
+  <div class="benefit-item">
+    <div class="icon">🌍</div>
+    <h4>Authentic</h4>
+    <p>African fabrics, African soul</p>
+  </div>
+  <div class="benefit-item">
+    <div class="icon">💬</div>
+    <h4>Personal Service</h4>
+    <p>Real people, real care</p>
+  </div>
+</div>
+
+<!-- FEATURED COLLECTION -->
+<section class="section">
+  <div class="section-label">Featured Collection</div>
+  <h2 class="section-title">Handpicked for You</h2>
+  <p class="section-subtitle">Our bestselling pieces — each one handmade with authentic African fabrics and love.</p>
+  <div class="product-grid" id="featured-grid"></div>
+  <div style="text-align:center;margin-top:3rem;">
+    <a href="shop.html" class="btn btn-outline">View Full Collection →</a>
+  </div>
+</section>
+
+<!-- CATERING TEASER -->
+<section style="background:var(--bg-warm);padding:6rem 0;">
+  <div style="max-width:1400px;margin:0 auto;padding:0 2rem;">
+    <div class="section-label">Catering</div>
+    <h2 class="section-title">The Taste of Home</h2>
+    <p class="section-subtitle">Jollof rice, suya, braai, puff-puff… bring authentic African flavors to your next gathering.</p>
+    <div class="catering-grid" id="home-catering-grid"></div>
+    <div style="text-align:center;margin-top:3rem;">
+      <a href="catering.html" class="btn btn-primary">Explore Catering →</a>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="section">
+  <div class="newsletter">
+    <h3>Join the Family</h3>
+    <p>Be the first to know about new collections, restocks, and get 10% off your first order.</p>
+    <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+      <input type="email" id="newsletter-email" placeholder="your@email.com" required>
+      <button type="submit">Sign Me Up</button>
+    </form>
+  </div>
+</section>
+
+<!-- DOMAIN SUGGESTION -->
+<section style="background:var(--bg-warm);padding:3rem 2rem;text-align:center;border-top:1px solid var(--border);">
+  <div style="max-width:600px;margin:0 auto;">
+    <div style="font-size:2rem;margin-bottom:0.5rem;">🌍</div>
+    <h3 style="font-family:var(--font-heading);font-size:1.4rem;font-weight:700;font-style:italic;margin-bottom:0.5rem;">Find Us Online</h3>
+    <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">
+      Search <strong>"Jazy's House African Fashion"</strong> or visit:
+    </p>
+    <div style="font-family:monospace;font-size:1.1rem;color:var(--accent);font-weight:700;">
+      jazyshouse-african.com
+    </div>
+    <p style="color:var(--text-light);font-size:0.75rem;margin-top:0.75rem;">African fashion · African catering · African handmade</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3><span>Jazy's</span> House</h3>
+      <p>African fashion, handmade accessories & African food catering. From our hands to your heart. Est. 2025.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="shop.html?cat=women">Women</a></li>
+        <li><a href="shop.html?cat=men">Men</a></li>
+        <li><a href="shop.html?cat=kids">Kids</a></li>
+        <li><a href="shop.html?cat=accessories">Accessories</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="about.html">Our Story</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Follow</h4>
+      <ul>
+        <li><a href="https://www.instagram.com/jazy_shouse">Instagram</a></li>
+        <li><a href="https://www.tiktok.com/@africanfood6">TikTok</a></li>
+        <li><a href="#">Pinterest</a></li>
+        <li><a href="#">Facebook</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Jazy's House. All rights reserved. Made with love.</p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Featured = first 4 products
+  const fg = document.getElementById('featured-grid');
+  if (fg) {
+    fg.innerHTML = products.slice(0, 4).map(p => `
+      <div class="product-card fade-up">
+        <div class="product-image">
+          ${p.image}
+          ${p.badge ? `<span class="product-badge ${p.badgeClass}">${p.badge}</span>` : ''}
+        </div>
+        <div class="product-info">
+          <div class="product-category">${p.category}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">£${p.price}</div>
+          <button class="add-to-cart" onclick="addToCart('${p.id}')">Add to Cart</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  // Catering teaser = first 3
+  const hcg = document.getElementById('home-catering-grid');
+  if (hcg) {
+    hcg.innerHTML = cateringMenu.slice(0, 3).map(c => `
+      <div class="catering-card fade-up">
+        <div class="catering-img">${c.image}</div>
+        <div class="catering-info">
+          <h3>${c.name}</h3>
+          <p>${c.desc}</p>
+          <div class="price">${c.price}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+});
+</script>
+
+</body>
+</html>

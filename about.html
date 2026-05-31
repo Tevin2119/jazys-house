@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About | Jazy's House — African Fashion & Food, Handmade with Love</title>
+  <meta name="description" content="About Jazy's House — your home for African handmade fashion & authentic African catering. Shop Ankara, Kente, Dashiki. Book African food for events. Crafted with love, rooted in African culture.">
+  <meta name="keywords" content="African fashion brand, African handmade, about Jazy's House, African clothing brand, African catering company">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧡</text></svg>">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span>Jazy's</span> House <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION</small></a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="catering.html">Catering</a></li>
+      <li><a href="about.html" class="active">Our Story</a></li>
+      <li><button class="cart-icon" onclick="openCart()" aria-label="Cart">🛒<span class="cart-count">0</span></button></li>
+    </ul>
+    <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<div class="cart-overlay" id="cart-overlay"></div>
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-header"><h3>Your Cart</h3><button class="cart-close" onclick="closeCart()">✕</button></div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total">Total: <span id="cart-total">£0</span></div>
+    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+  </div>
+</div>
+
+<!-- ABOUT HERO -->
+<section class="catering-hero" style="min-height:45vh;padding:120px 2rem 4rem;text-align:center;">
+  <div style="max-width:700px;margin:0 auto;position:relative;z-index:1;">
+    <div class="hero-badge">Our Story</div>
+    <h1 style="font-family:var(--font-heading);font-size:clamp(2.5rem,5vw,4rem);font-weight:800;font-style:italic;line-height:1.1;margin-bottom:1rem;color:var(--text);">
+      From Our Hands<br>to Your Heart
+    </h1>
+    <p style="color:var(--text-muted);font-size:1rem;">A love letter to African craft, culture, and cuisine.</p>
+  </div>
+</section>
+
+<!-- ABOUT CONTENT -->
+<section class="section">
+  <div class="about-grid">
+    <div class="about-visual">🌍</div>
+    <div class="about-text">
+      <div class="section-label">The Vision</div>
+      <h2>More Than a Brand — A Heritage</h2>
+      <p>Jazy's House was born from a simple truth: <strong>African craft is world-class.</strong> Our fabrics tell stories. Our food brings people together. For too long, the world has slept on what the continent has to offer.</p>
+      <p>We're here to change that — one Ankara dress, one plate of jollof, one handmade accessory at a time.</p>
+      <p>Every piece in our collection is handmade. Every dish on our catering menu comes from recipes passed down through generations. We don't cut corners — we pour heart into everything we do.</p>
+      <p><strong>Welcome to Jazy's House. You're family now.</strong> 🧡</p>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section style="background:var(--bg-warm);padding:6rem 2rem;">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="section-label">What We Stand For</div>
+    <h2 class="section-title">The Heart of the House</h2>
+    <div class="values">
+      <div class="value-item">
+        <div class="icon">🤲</div>
+        <h4>Craftsmanship</h4>
+        <p>Every stitch. Every bead. Every dish. Made by hand, made with pride.</p>
+      </div>
+      <div class="value-item">
+        <div class="icon">🌍</div>
+        <h4>Authenticity</h4>
+        <p>Real African fabrics. Real African flavors. No shortcuts, no imitations.</p>
+      </div>
+      <div class="value-item">
+        <div class="icon">👨‍👩‍👧‍👦</div>
+        <h4>Community</h4>
+        <p>When you buy from Jazy's House, you support real artisans and cooks.</p>
+      </div>
+      <div class="value-item">
+        <div class="icon">🔥</div>
+        <h4>Boldness</h4>
+        <p>African fashion is not a trend — it's a statement. Wear it loud.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="section">
+  <div class="newsletter">
+    <h3>Stay Connected</h3>
+    <p>New collections, restocks, and the smell of jollof in your inbox.</p>
+    <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+      <input type="email" id="newsletter-email" placeholder="your@email.com" required>
+      <button type="submit">Join the House</button>
+    </form>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand"><h3><span>Jazy's</span> House</h3><p>African fashion, handmade accessories & African food catering. From our hands to your heart. Est. 2025.</p></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html?cat=women">Women</a></li><li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=kids">Kids</a></li><li><a href="shop.html?cat=accessories">Accessories</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="catering.html">Catering</a></li><li><a href="#">Contact</a></li><li><a href="#">FAQ</a></li></ul></div>
+    <div class="footer-col"><h4>Follow</h4><ul><li><a href="https://www.instagram.com/jazy_shouse">Instagram</a></li><li><a href="https://www.tiktok.com/@africanfood6">TikTok</a></li><li><a href="#">Pinterest</a></li><li><a href="#">Facebook</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© 2025 Jazy's House. All rights reserved. Made with love.</p></div>
+</footer>
+
+<script src="js/main.js"></script>
+
+</body>
+</html>

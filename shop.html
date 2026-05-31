@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop African Fashion | Jazy's House — Handmade Ankara, Kente & Dashiki</title>
+  <meta name="description" content="Shop African handmade fashion at Jazy's House. Authentic Ankara dresses, Kente shirts, Dashiki, Mudcloth — women, men & kids. African clothing & handmade accessories. Free UK shipping over £60.">
+  <meta name="keywords" content="African fashion shop, buy African clothes, Ankara dress, Kente shirt, Dashiki, African handmade accessories, African clothing UK, Jazy's House">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧡</text></svg>">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span>Jazy's</span> House <small style="font-size:0.5em;font-weight:400;color:var(--accent);letter-spacing:2px;display:block;font-style:normal;">AFRICAN FASHION</small></a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html" class="active">Shop</a></li>
+      <li><a href="catering.html">Catering</a></li>
+      <li><a href="about.html">Our Story</a></li>
+      <li><button class="cart-icon" onclick="openCart()" aria-label="Cart">🛒<span class="cart-count">0</span></button></li>
+    </ul>
+    <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<div class="cart-overlay" id="cart-overlay"></div>
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-header"><h3>Your Cart</h3><button class="cart-close" onclick="closeCart()">✕</button></div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total">Total: <span id="cart-total">£0</span></div>
+    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+  </div>
+</div>
+
+<section class="section" style="padding-top:120px;">
+  <div class="section-label">Our Collection</div>
+  <h2 class="section-title">Handmade with Soul</h2>
+  <p class="section-subtitle">Every piece is crafted with authentic African fabrics — Ankara, Kente, Mudcloth, Dashiki. Made by hand, worn with pride.</p>
+
+  <div class="category-tabs">
+    <button class="category-tab active" onclick="switchCategory(this, 'all')">All</button>
+    <button class="category-tab" onclick="switchCategory(this, 'women')">Women</button>
+    <button class="category-tab" onclick="switchCategory(this, 'men')">Men</button>
+    <button class="category-tab" onclick="switchCategory(this, 'kids')">Kids</button>
+    <button class="category-tab" onclick="switchCategory(this, 'accessories')">Accessories</button>
+  </div>
+
+  <div class="product-grid" id="product-grid"></div>
+</section>
+
+<section style="background:var(--bg-warm);padding:4rem 2rem;">
+  <div class="newsletter" style="margin-top:0;">
+    <h3>First Order? 10% Off</h3>
+    <p>Join the Jazy's House family for exclusive drops and a welcome gift.</p>
+    <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+      <input type="email" id="newsletter-email" placeholder="your@email.com" required>
+      <button type="submit">Get 10% Off</button>
+    </form>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3><span>Jazy's</span> House</h3>
+      <p>African fashion, handmade accessories & African food catering. From our hands to your heart. Est. 2025.</p>
+    </div>
+    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html?cat=women">Women</a></li><li><a href="shop.html?cat=men">Men</a></li><li><a href="shop.html?cat=kids">Kids</a></li><li><a href="shop.html?cat=accessories">Accessories</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="catering.html">Catering</a></li><li><a href="#">Contact</a></li><li><a href="#">FAQ</a></li></ul></div>
+    <div class="footer-col"><h4>Follow</h4><ul><li><a href="https://www.instagram.com/jazy_shouse">Instagram</a></li><li><a href="https://www.tiktok.com/@africanfood6">TikTok</a></li><li><a href="#">Pinterest</a></li><li><a href="#">Facebook</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© 2025 Jazy's House. All rights reserved. Made with love.</p></div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get('cat');
+  if (cat && ['women','men','kids','accessories'].includes(cat)) {
+    const btn = document.querySelector(`[onclick*="'${cat}')"]`);
+    if (btn) switchCategory(btn, cat);
+  }
+});
+</script>
+
+</body>
+</html>
