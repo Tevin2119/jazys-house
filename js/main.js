@@ -4,6 +4,9 @@
 
 const CART_KEY = 'jazyshouse_cart';
 
+/* ── STRIPE CONFIG ── */
+const STRIPE_KEY = 'pk_test_51Td4PiDTmltTbeAlaza1NFr9ivt1NZS42T4S9I6MoSovcB2lveHKqs57woBVVUbiUrw6OrMW5VywwFX9iruxNgJT00mPMXEnr0';
+
 /* ── PRODUCT CATALOG (African Handmade) ── */
 const products = [
   // WOMEN'S CLOTHING
@@ -261,8 +264,23 @@ function subscribeNewsletter(event) {
 function checkout() {
   const cart = getCart();
   if (cart.length === 0) { showToast('Your cart is empty 🛒'); return; }
-  const items = cart.map(i => `${i.name} ×${i.qty} — £${i.price * i.qty}`).join('\n');
-  alert(`🛍️ Jazy's House — Order Summary\n\n${items}\n\nTotal: £${cartTotal()}\n\n💳 Payment: Stripe / PayPal coming soon\n📧 We'll email your confirmation`);
+
+  const items = cart.map(item => {
+    const product = products.find(p => p.id === item.id);
+    return {
+      name: item.name,
+      qty: item.qty,
+      price: item.price,
+      image: (product && product.img) ? product.img : null
+    };
+  });
+
+  const total = cartTotal();
+  const orderSummary = items.map(i => `${i.name} ×${i.qty} — £${(i.price * i.qty).toFixed(2)}`).join('\n');
+
+  // For now: show order summary (Stripe Checkout needs a backend to create sessions)
+  // When ready, replace with Stripe redirect
+  alert(`🛍️ Jazy's House — Order Summary\n\n${orderSummary}\n\n💳 Total: £${total.toFixed(2)}\n\n📧 To complete your order, email faye.dienaba@yahoo.com or call 080-4357-0980\n\nWe'll send a payment link!\n\nPayment methods: 💳 Card · 📱 Apple Pay · 📱 Google Pay`);
 }
 
 /* ── INIT ── */
