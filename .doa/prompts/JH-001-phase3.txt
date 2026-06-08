@@ -1,0 +1,104 @@
+@orchestrator JH-001 Phase 3 — Storefront (Port from Static Site)
+
+## Context
+- Phase 1+2 complete: Prisma schema (8 models now — OrderItem has tenantId), NextAuth admin, product CRUD
+- Static design reference: C:\Users\Tevin\jazyshouse\ (HTML/CSS/JS — DO NOT modify)
+- Working directory: C:\Users\Tevin\source\repos\jazyshouse-platform\
+- Tenant-first: all data queries scoped by tenantId from getCurrentTenant() / getTenantByHost()
+- Money is Int (pence). Display with formatPrice() from lib/utils.ts
+- build green, tsc clean, prisma valid
+
+## Static Site Pages to Port (design reference only, NOT copy-paste HTML)
+
+### 3a. Home Page — / (store route group)
+Replace src/app/(store)/page.tsx placeholder. Port from jazyshouse/index.html:
+- Hero section (headline, CTA → /shop)
+- Featured products carousel (query 4-6 products from DB where badge is set)
+- Catering teaser (CTA → /catering)
+- Superfoods/Pantry highlight section
+- Lookbook gallery section
+- All content served from DB (categories, products), not hardcoded
+
+### 3b. Shop/Catalog — /shop
+New route: src/app/(store)/shop/page.tsx
+- Product grid from DB, filterable by category
+- Category sidebar/filter from DB categories
+- Search by name (server-side, input → URL param → Prisma contains)
+- Product cards: image (first in images[]), emoji fallback, name, price (formatted), badge
+- Responsive grid (2-col mobile, 3-col tablet, 4-col desktop)
+- Empty state for no results
+- Port visual style from jazyshouse/shop.html (NOT HTML)
+
+### 3c. Product Detail — /shop/[slug]
+New route: src/app/(store)/shop/[slug]/page.tsx
+- Full product view: images gallery, description, price, stock status, add to cart button
+- Related products (same category, exclude current)
+- Breadcrumb: Home > Shop > Category > Product
+- 404 if product not found or soft-deleted
+
+### 3d. Catering — /catering
+New route: src/app/(store)/catering/page.tsx
+- Port catering info from jazyshouse/catering.html
+- 6 catering packages (hardcoded — these are service offerings, not DB products)
+- Inquiry form (name, email, date, guests, package select, message)
+- Form posts to a server action that creates CateringInquiry (tenant-scoped)
+- Success state after submission
+
+### 3e. About — /about
+New route: src/app/(store)/about/page.tsx
+- Brand story, values, chef profile (Chef Dienaba)
+- Port content from jazyshouse/about.html
+- Visual story, not just text dump
+
+### 3f. Cart — /cart
+New route: src/app/(store)/cart/page.tsx
+- Client component: reads cart from localStorage
+- Displays items: product image/emoji, name, quantity controls, line total, remove
+- Cart summary: subtotal, shipping estimate ("calculated at checkout")
+- Proceed to Checkout button
+- Empty cart state with CTA to /shop
+- Cart logic shared via src/lib/cart.ts (addItem, removeItem, updateQty, getCart, clearCart)
+- Cart items stored as { productId, name, price, quantity, image } in localStorage
+
+### 3g. Checkout — /checkout
+New route: src/app/(store)/checkout/page.tsx
+- Shipping form: name, email, address
+- Order summary from cart
+- Place Order button → server action
+- Server action: validates cart against DB (verifyCart from lib/stripe.ts), creates Order + OrderItems in transaction, clears cart cookie, redirects to confirmation
+- Confirmation page: /checkout/confirmation?orderId=xxx
+
+### 3h. Navigation & Footer
+- Shared store header: logo, nav links (Home, Shop, Catering, About), cart icon with count badge
+- Shared store footer: links, newsletter signup (server action → creates CateringInquiry or a Newsletter model)
+- Mobile hamburger menu
+
+### 3i. PWA / SEO
+- Metadata for all pages (title, description, og:image from tenant settings)
+- manifest.json (already partially set up)
+- sitemap.xml (dynamic, from DB products/categories)
+
+## Critical Constraints (from council findings)
+- C1 FIXED (category ownership validation in products/actions.ts) — but storefront must also NEVER trust categoryId from URL params without tenant scope
+- C2 FIXED (OrderItem has tenantId) — checkout must set tenantId on every OrderItem
+- ALL data queries must scope by tenantId from getCurrentTenant()
+- No Prisma in client components — use server components for data, pass as props
+- Every page: `export const dynamic = "force-dynamic"` (we can optimize later with ISR)
+- DO NOT copy-paste the static site's HTML. Use it ONLY as visual/design reference. Build proper React components with Tailwind.
+
+## Visual Design (from static site analysis)
+- Brand colors: Primary #c0563d (terracotta), Secondary #f0e6d3 (cream)
+- Fonts: Playfair Display (headings), DM Sans (body) — already in root layout
+- Cards: white bg, subtle shadow, rounded corners
+- Buttons: terracotta bg, white text, hover darken
+- Section spacing: generous padding, alternating light/dark backgrounds
+- Mobile-first responsive
+
+## Verification
+- npm run build must pass
+- npx tsc --noEmit must pass
+- All new routes load without errors
+- No hardcoded product data (all from DB seed)
+- Every page scoped by tenantId
+- Cart works end-to-end (localStorage → checkout form)
+- Save summary to .doa/implementations/JH-001-phase3.md

@@ -1,0 +1,20 @@
+@orchestrator Review Phase 1 + Phase 2 of Jazy's House Platform (JH-001).
+
+The codebase is at C:\Users\Tevin\source\repos\jazyshouse-platform\
+
+## What to review
+Phase 1: Foundation (prisma/schema.prisma, src/middleware.ts, src/lib/*.ts, src/app/layout.tsx, (store)/layout.tsx, (store)/page.tsx, (admin)/layout.tsx)
+Phase 2: Admin Dashboard (src/app/(admin)/admin/*, src/auth.ts, src/lib/auth.ts, src/app/login/*, src/components/admin/*, src/app/api/auth/*)
+
+## Review these 8 items against CODING-STANDARDS.md:
+
+1. **Tenant scoping** — every Prisma query must scope by tenantId. Check for leaks.
+2. **Money as Int** — price/total must be Int (pence), never Float. Check schema + all forms/actions.
+3. **Server vs Client** — no Prisma imports in client components. Every data fetch server-side.
+4. **Auth guards** — every admin route guarded by requireAdmin(). Login page only unauthenticated access.
+5. **Error handling** — no raw error leaks to client. Generic messages.
+6. **SQL injection** — no raw SQL, no template strings in queries.
+7. **File size** — no component over ~300 lines. Flag any.
+8. **TypeScript strictness** — any `any` types, missing return types, unsafe casts?
+
+Return a checklist of findings with file paths and line numbers. Mark each PASS or FAIL with explanation.

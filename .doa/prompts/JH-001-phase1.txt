@@ -1,0 +1,31 @@
+@orchestrator Implement Phase 1 of JH-001 (Jazy's House Platform Foundation).
+
+CONTEXT:
+- Repo: C:\Users\Tevin\source\repos\jazyshouse-platform
+- Plan: .doa/plans/JH-001-plan.md
+- Design ref: C:\Users\Tevin\jazyshouse\ (static HTML/CSS/JS site)
+- Council reviews: .doa/reviews/ (6 reviews, 59 findings)
+
+PHASE 1 SCOPE:
+1. Initialize Next.js 15 project with TypeScript, Tailwind, shadcn/ui
+2. Set up Prisma with PostgreSQL (use Supabase free tier connection string placeholder in .env.example)
+3. Create database schema (Tenant, Category, Product, Order, OrderItem, User, CateringInquiry)
+4. Build tenant resolution using LAYOUT-BASED approach (NOT edge middleware — Edge can't run Prisma)
+5. Create lib/ files: db.ts, auth.ts, stripe.ts, tenant.ts, utils.ts
+6. Create layout shells: (store)/layout.tsx, (admin)/layout.tsx
+7. Seed script: import 59 products from C:\Users\Tevin\jazyshouse\js\main.js
+8. Seed first tenant: "Jazy's House Tokyo" (slug: jazyshouse)
+
+CRITICAL FIXES TO INCORPORATE (from council):
+- price: Int (cents), NOT Float
+- Add stripeEventId to Order model
+- Add @@unique([tenantId, slug]) to Product
+- Add tenant relation to CateringInquiry
+- Server-side price verification stub at checkout (for Phase 4)
+- Admin layout with auth guard stub
+- Use layout-based tenant resolution, NOT edge middleware
+
+Follow AGENTS.md and CODING-STANDARDS.md. Server components by default. 
+Scaffold the project structure — don't build full pages yet. Phase 1 deliverables: working project structure, Prisma schema, middleware, lib files, seed script, layout shells. Storefront pages come in Phase 3.
+
+Write implementation summary to .doa/implementations/JH-001-phase1.md when done.

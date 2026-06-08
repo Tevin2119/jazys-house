@@ -1,0 +1,6 @@
+# Council artifact tracking — everything in .doa/ IS tracked
+# The root .gitignore has "!.doa/" to ensure this
+# This file exists to prevent accidental ignoring by nested rules
+
+# Nothing is ignored under .doa/
+!*

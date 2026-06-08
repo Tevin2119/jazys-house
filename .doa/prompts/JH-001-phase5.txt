@@ -1,0 +1,69 @@
+@orchestrator JH-001 Phase 5 — Multi-Storefront (Domain Routing + Themes)
+
+## Context
+- Phases 1-4 complete: foundation, admin, storefront, payments
+- Tenant resolution already exists: middleware.ts → x-tenant-host → lib/tenant.ts → layout
+- Tenant model has: slug, domain, currency, theme (JSON: { primary, secondary, font, logoUrl })
+- (store)/layout.tsx already injects theme CSS vars from getCurrentTenant()
+- Admin has tenant-switcher for SUPER_ADMIN + theme editor in settings
+- Current seed: 1 tenant ("Jazy's House Tokyo" / jazyshouse)
+
+## Task: Production Multi-Tenant Infrastructure
+
+### 5a. Tenant-Aware Domain Routing (lib/tenant.ts enhancement)
+Enhance the existing getCurrentTenant() to robustly handle:
+1. **Subdomain**: `jazyshouse.localhost:3000` → resolve slug from subdomain
+2. **Custom domain**: `jazyshouse.com` → resolve by Tenant.domain field  
+3. **Path-based fallback**: `/store/jazyshouse` → resolve by path slug (for dev/testing)
+4. **Root domain fallback**: `localhost:3000` → default tenant (lowest id or env-configured)
+5. **www prefix handling**: strip `www.` before lookup
+6. **Port stripping**: ignore port numbers for domain matching
+7. **Case-insensitive**: slug matching should be case-insensitive
+
+### 5b. Admin Tenant CRUD (SUPER_ADMIN only)
+New admin routes:
+1. **GET /admin/tenants** — list all tenants (SUPER_ADMIN only)
+2. **POST /admin/tenants** — create tenant form (name, slug, domain, currency, theme)
+   - Auto-seed: create default categories for new tenant (Women, Men, Kids, Accessories, Pantry, Home Décor)
+   - Create first TENANT_ADMIN user for the new tenant
+3. **GET /admin/tenants/[id]/edit** — edit tenant settings
+4. **POST /admin/tenants/[id]/delete** — soft-delete or hard-delete tenant
+   - Block if orders exist (financial records)
+   - Cascade categories/products/users if empty
+
+### 5c. Tenant Theme System (Hardening)
+1. **Theme validation** (Thinker finding M7): validate colors against `^#[0-9a-fA-F]{6}$`, font against allowlist, reject arbitrary tokens
+2. **Default theme**: if tenant.theme is null, use a sensible default (brand terracotta/cream)
+3. **Theme preview**: in admin settings, live-preview theme changes before saving
+4. **Logo support**: upload/URL for tenant logoUrl, displayed in header and admin shell
+5. Add tenant name + logo to store header (already partially done)
+
+### 5d. Multi-Tenant Seed Update
+Update prisma/seed.ts to seed 2-3 demo tenants with different themes/products:
+1. "Jazy's House Tokyo" (jazyshouse) — existing, terracotta/cream
+2. "AfroChic London" (afrochic) — different theme (e.g., deep green/gold), subset of products
+3. "Baobab Market" (baobab) — different theme (e.g., warm yellow/brown), pantry-focused
+
+### 5e. Tenant Isolation Audit (Hardening)
+1. Verify every admin query uses `where: { tenantId }`
+2. Verify every storefront query uses tenant from getCurrentTenant()
+3. Add integration test stubs: `__tests__/tenancy/` with basic isolation checks
+4. Ensure API routes (/api/* if any) scope by tenant
+
+### 5f. Dev Experience
+1. Update .env.example with multi-tenant config:
+   ```
+   DEFAULT_TENANT_SLUG=jazyshouse
+   ```
+2. Add npm script: `npm run dev:jazyshouse` (sets host header for subdomain testing)
+3. Document tenant setup in README.md (brief — 1 paragraph)
+
+## Verification
+- npm run build must pass
+- npx tsc --noEmit clean
+- prisma validate passes
+- Can create a new tenant through admin, see it show up in switcher
+- New tenant gets categories auto-created
+- Different theme per tenant renders correctly on storefront
+- Domain/subdomain/path resolution all work
+- Save summary to .doa/implementations/JH-001-phase5.md

@@ -1,0 +1,78 @@
+@orchestrator JH-001 Phase 2 — Admin Dashboard
+
+## Context
+Phase 1 is complete. The foundation is built:
+- Next.js 15.5 App Router with (store)/ and (admin)/ route groups
+- Prisma schema with 7 models: Tenant, Category, Product, Order, OrderItem, User, CateringInquiry (price: Int, stripeEventId indexed, @@unique([tenantId, slug]))
+- lib/: db.ts (singleton), tenant.ts (layout-based resolution), auth.ts (requireAdmin stub), stripe.ts (verifyCart stub), utils.ts
+- middleware.ts: x-tenant-host header only (NO Prisma in edge)
+- (store)/layout.tsx: resolves tenant, injects theme vars
+- (admin)/layout.tsx: auth-guard shell with requireAdmin() call
+- src/app/(admin)/admin/page.tsx: placeholder dashboard
+
+## Task: Build the Admin Dashboard
+
+### 2a. NextAuth / Auth.js Wiring
+Replace the stubs in lib/auth.ts with real NextAuth v5 (Auth.js). Connect to the User model in Prisma. Support email/password login. requireAdmin() must verify session role === SUPER_ADMIN or TENANT_ADMIN. redirectToLogin() for unauthenticated users.
+
+### 2b. Tenant Switcher
+If user is SUPER_ADMIN (tenantId: null), show a tenant selector dropdown at the top of the admin shell. Switching sets the active tenant in session/token. TENANT_ADMIN users see only their tenant. Save active tenant ID in the NextAuth session token.
+
+### 2c. Admin Layout Shell
+Replace (admin)/layout.tsx with a full admin shell:
+- Left sidebar: navigation (Dashboard, Products, Categories, Orders, Catering, Settings)
+- Top bar: tenant name, active store badge, user avatar + logout
+- Active tenant indicator
+- Mobile-responsive (collapsible sidebar)
+
+### 2d. Product Management (CRUD)
+- /admin/products — table with search, category filter, status filter (active/deleted)
+- /admin/products/new — create form (name, description, price in GBP, category select, images, stock, badge)
+- /admin/products/[id]/edit — edit form
+- Soft-delete (set deletedAt), not hard delete
+- All queries scoped by tenantId from session
+- Image upload placeholder (Cloudinary — Phase 5, just URL input for now)
+
+### 2e. Category Management
+- /admin/categories — list, create, edit, delete (if no products)
+- tenant-scoped
+
+### 2f. Order Management
+- /admin/orders — table with status filter, search by email/name
+- /admin/orders/[id] — order detail (items, customer info, status changer)
+- Status transitions: PENDING → PROCESSING → SHIPPED → DELIVERED (or → CANCELLED at any point)
+- tenant-scoped
+
+### 2g. Catering Inquiry Management
+- /admin/catering — table (name, email, date, guests, package, status)
+- Status changer: new → contacted → booked → declined
+- tenant-scoped
+
+### 2h. Settings Page
+- /admin/settings — tenant info display (name, slug, domain, currency)
+- Theme editor placeholder (primary/secondary color pickers, font selector — store as JSON in tenant.theme)
+
+### 2i. Admin Home (/admin)
+Replace the placeholder with a real dashboard:
+- Stats cards: total products, active orders, new inquiries, revenue (sum of DELIVERED orders)
+- Recent orders table (last 5)
+- New catering inquiries (last 5)
+- All tenant-scoped
+
+## Constraints
+- ALL data queries must include `where: { tenantId: session.tenantId }` (or for SUPER_ADMIN, the selected tenant)
+- Money is Int (pence). Display with formatPrice() from lib/utils.ts
+- Use shadcn/ui components (already installed: Button). Add Table, Input, Select, Dialog, DropdownMenu, Card, Badge as needed (npx shadcn@latest add)
+- Tailwind v4 for all styling
+- TypeScript strict mode
+- No Prisma in client components — create server actions or API routes for mutations
+- Run `npx tsc --noEmit` and `npm run build` to verify before declaring done
+- Write a summary to .doa/implementations/JH-001-phase2.md
+
+## Verification
+After build succeeds, run these checks:
+1. All admin routes load without errors
+2. Type check passes
+3. No Prisma imports in client components (use 'use server' actions)
+4. Every data fetch has tenantId scope
+5. Auth guards on all admin routes

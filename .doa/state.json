@@ -1,0 +1,20 @@
+{
+  "version": "6.0",
+  "council": "Council of Kangs — 7 seats",
+  "source": "Mirrored from ClubRight Council of Kangs v5",
+  "ratified": "2026-06-07",
+  "active_task": null,
+  "history": [
+    {"version": "5.0", "desc": "Reed/Doom/Lex mapped wrong (Reed=Gemini, Doom=OR, Lex=above)"},
+    {"version": "6.0", "desc": "Correct mapping: Reed=MAKER(MoA), Lex=ADVERSARY(Gemini-pro), Doom=ARCHIVIST(Gemini-flash)"}
+  ],
+  "agents": {
+    "prime":     { "seat": 0, "agent": "Hermes",       "model": "deepseek-v4-pro", "account": "DeepSeek free", "cost": "$0" },
+    "workhorse": { "seat": 1, "agent": "Claude Code",  "model": "sonnet",         "account": "tevin.clubright Max", "cost": "Pool" },
+    "swarm":     { "seat": 2, "agent": "OpenCode",     "model": "gpt-5.5",        "account": "rivalkidchelsea Plus", "cost": "1/20 msgs" },
+    "thinker":   { "seat": 3, "agent": "Codex CLI",    "model": "gpt-5.5",        "account": "tevin.clubright Plus", "cost": "0-1/20 msgs" },
+    "maker":     { "seat": 4, "agent": "Hermes MoA",   "model": "4× free OR",     "account": "OpenRouter free", "cost": "$0" },
+    "adversary": { "seat": 5, "agent": "Gemini CLI",   "model": "gemini-2.5-pro", "account": "rivalkidchelsea Pro $189/yr", "cost": "$0" },
+    "archivist": { "seat": 6, "agent": "Gemini CLI",   "model": "gemini-2.5-flash","account": "tevin.clubright free", "cost": "$0" }
+  }
+}

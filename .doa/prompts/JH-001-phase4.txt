@@ -1,0 +1,85 @@
+@orchestrator JH-001 Phase 4 — Payments (Stripe Checkout + Webhooks)
+
+## Context
+- Phases 1-3 complete: full admin dashboard + customer storefront with cart/checkout
+- Stripe 17.5 already installed. lib/stripe.ts has stripe client + verifyCart() stub.
+- Prisma schema: Order (stripeSessionId, stripeEventId), OrderItem (now has tenantId)
+- lib/cart.ts has cart functions. Checkout posts to src/app/(store)/checkout/actions.ts (placeOrder exists as stub)
+- Council findings to address: H1 (order status race), H2 (stock oversell), H3 (user email uniqueness)
+
+## Task: Wire Stripe Payments End-to-End
+
+### 4a. Stripe Checkout Session (Server Action)
+Replace the placeOrder stub in src/app/(store)/checkout/actions.ts:
+1. Receive cart items + shipping info from checkout form
+2. Re-price EVERY item server-side via verifyCart() — COMPARE client price to DB price, reject mismatch
+3. Create Order + OrderItems in a SINGLE Prisma transaction:
+   - Set tenantId on Order AND every OrderItem
+   - Snapshot prices at time of order
+   - Decrement stock atomically: `product.update({ where: { id, stock: { gte: quantity } }, data: { stock: { decrement: quantity } } })` — if this fails (stock < quantity), reject the order
+   - Set status: PENDING
+4. Create Stripe Checkout session:
+   - line_items from verified cart (price in minor units)
+   - success_url: /checkout/confirmation?session_id={CHECKOUT_SESSION_ID}
+   - cancel_url: /cart
+   - metadata: { orderId, tenantId }
+5. Update Order.stripeSessionId with the session ID
+6. Return { url: session.url } — client redirects to Stripe
+
+### 4b. Stripe Webhook Handler
+New route: src/app/api/webhooks/stripe/route.ts
+1. Verify webhook signature with STRIPE_WEBHOOK_SECRET (constructEvent)
+2. Handle checkout.session.completed:
+   - Look up Order by stripeSessionId
+   - Verify tenantId matches session metadata
+   - Update Order.status from PENDING → PROCESSING
+   - Store stripeEventId for idempotency (skip if already processed)
+3. Handle charge.refunded / payment_intent.payment_failed (optional — can stub)
+4. Return 200 for handled events, 400 for unhandled
+
+### 4c. Checkout Confirmation Update
+Update src/app/(store)/checkout/confirmation/page.tsx:
+- If ?session_id= present, look up Order by stripeSessionId (tenant-scoped)
+- Display order summary: items, total, status
+- Clear client cart on mount
+- Redirect to /cart if order not found
+
+### 4d. Admin Order Integration
+Update admin order detail page to show:
+- Stripe session link (if stripeSessionId set)
+- Payment status badge
+- Status transitions respecting Stripe state (can't ship an unpaid order)
+
+### 4e. Council Fix — H1 (Order Status Race)
+In ALL status transition code (admin orders/actions.ts):
+- Use conditional update: `order.updateMany({ where: { id, tenantId, status: currentStatus }, data: { status: newStatus } })`
+- Check count === 1. If 0, it means someone else changed the status → throw conflict error
+- This makes transitions atomic
+
+### 4f. Council Fix — H2 (Stock Oversell)
+In placeOrder:
+- Wrap order creation + stock decrement in a Prisma interactive transaction
+- Stock decrement must use conditional: `where: { id, stock: { gte: quantity } }`
+- If any stock check fails, roll back entire transaction
+- DON'T just check-then-write — it must be atomic
+
+### 4g. Stripe Webhook Idempotency
+- Before processing any webhook event, check `Order.stripeEventId`
+- If the same eventId was already processed, return 200 (idempotent)
+- This prevents double-processing of payment confirmations
+
+## Environment Variables Needed
+```
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+Already in .env.example. User must set real values.
+
+## Verification
+- npm run build must pass
+- npx tsc --noEmit clean
+- Verify: placeOrder handles stock exhaustion gracefully
+- Verify: webhook handler validates signatures
+- Verify: H1 (conditional status update) and H2 (atomic stock) are implemented
+- Save summary to .doa/implementations/JH-001-phase4.md

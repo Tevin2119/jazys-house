@@ -1,0 +1,89 @@
+@orchestrator JH-001 Phase 6 — Deploy (Vercel + PWA Polish)
+
+## Context
+- All 5 code phases complete. 25 routes, build green, tsc clean, prisma valid.
+- App is production-ready Next.js 15.5 App Router with Prisma + Supabase + Stripe.
+- Multi-tenant with domain/subdomain/path routing.
+- PWA manifest already exists (app/manifest.ts), service worker via next-pwa or built-in.
+
+## Task: Production Deployment Readiness
+
+### 6a. Vercel Configuration
+Create/update vercel.json:
+- Framework: nextjs
+- Build command: prisma generate && next build
+- Install command: npm install
+- Output directory: .next
+- Environment variable placeholders (document, don't set real values)
+- Region: iad1 (or closest to users)
+
+### 6b. Environment Documentation
+Update .env.example with ALL required vars across all phases:
+```
+# Database (Supabase)
+DATABASE_URL=postgresql://...
+DIRECT_URL=postgresql://...
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Auth
+AUTH_SECRET=...
+AUTH_URL=https://your-domain.com
+
+# App
+NEXT_PUBLIC_ROOT_DOMAIN=your-domain.com
+DEFAULT_TENANT_SLUG=jazyshouse
+
+# Optional: Email (Resend), CDN (Cloudinary), etc.
+```
+
+### 6c. PWA Hardening
+1. Ensure manifest.ts has all required icons (192, 512) with correct paths
+2. Verify CSP headers (or add next.config.ts Content-Security-Policy)
+3. Add robots.txt (allow all, sitemap pointer)
+4. Add favicon.ico reference in root layout
+5. Ensure offline support (already partially done — verify service worker scope)
+
+### 6d. next.config.ts Hardening
+Review and update:
+- images: { remotePatterns } for any external image sources (Cloudinary, Vercel Blob)
+- headers() for security: X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- Production optimizations
+
+### 6e. Supabase Setup Guide
+Create docs/supabase-setup.md:
+- How to create a Supabase project
+- Connection string format (pooled + direct)
+- How to run migrations: npx prisma migrate deploy
+- How to seed: npm run db:seed
+- How to get the connection string
+
+### 6f. Stripe Setup Guide
+Create docs/stripe-setup.md:
+- How to get test API keys
+- How to set up webhook endpoint
+- How to test locally with stripe CLI
+- How to switch to live keys
+
+### 6g. Final README
+Update README.md with:
+- Project overview (multi-tenant e-commerce platform)
+- Tech stack
+- Quick start (clone, install, env, db, seed, dev)
+- Architecture overview (route groups, tenant model)
+- Admin access (default credentials)
+- Deployment guide (link to docs)
+- Council of Kangs development workflow
+
+### 6h. Final Verification
+- npm run build (must pass)
+- npx tsc --noEmit (must pass)
+- npx prisma validate (must pass)
+- List all 25+ routes
+- Confirm no secrets in committed files (stripe keys, etc.)
+- Save summary to .doa/implementations/JH-001-phase6.md
+
+## Complete project file written to .doa/implementations/JH-001-final.md with full summary

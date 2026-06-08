@@ -1,0 +1,29 @@
+node_modules/
+.next/
+.env
+.env.local
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+
+# next.js
+/.next/
+/out/
+/build
+
+# misc
+.DS_Store
+*.pem
+.vercel
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# testing
+/coverage
+
+# prisma (migrations intentionally not tracked until a real DB is provisioned)
+prisma/migrations/
+!.doa/

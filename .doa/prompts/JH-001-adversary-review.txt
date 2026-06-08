@@ -1,0 +1,14 @@
+@orchestrator Security audit of Jazy's House Platform (JH-001). Code at C:\Users\Tevin\source\repos\jazyshouse-platform\
+
+Focus on:
+1. Auth bypass vectors — can a CUSTOMER hit admin routes? Can a TENANT_ADMIN access another tenant?
+2. IDOR — any endpoints where changing a URL ID gives access to another tenant's data?
+3. Tenant isolation — can tenant A see tenant B's products/orders/users?
+4. Input validation — price injection, XSS in name/description/badge fields, SQL injection
+5. Session security — JWT manipulation, token replay, logout completeness
+6. CSRF — are mutations protected?
+7. Password security — hashing, timing attacks, brute force
+8. File upload (image URLs) — path traversal, SSRF via URL input
+9. Next.js specific — middleware bypass, server action CSRF, route segment config leaks
+
+Be adversarial. Find what WILL be exploited. Each finding: file, line, exploit scenario, fix.

@@ -1,0 +1,13 @@
+@orchestrator Pattern analysis of Jazy's House Platform (JH-001). Code at C:\Users\Tevin\source\repos\jazyshouse-platform\
+
+Look for:
+1. Inconsistent patterns across similar modules (products vs categories vs orders vs catering)
+2. Duplicated logic that should be shared
+3. Missing patterns from CODING-STANDARDS.md
+4. Anti-patterns (loading data in client that could be server, unnecessary useEffects, prop drilling instead of Context, etc.)
+5. Naming inconsistencies (camelCase where kebab-case expected, singular/plural mismatches)
+6. Magic strings that should be constants/enums
+7. Missing edge-case handling (empty states, loading states, error states)
+8. Accessibility gaps (aria labels, keyboard navigation, color contrast)
+
+Find 6-10 patterns. Each: what's inconsistent, where (files), the canonical pattern that should be used, and the fix.

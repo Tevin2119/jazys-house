@@ -1,0 +1,17 @@
+@orchestrator Think about Jazy's House Platform (JH-001). Phase 1+2 are implemented at C:\Users\Tevin\source\repos\jazyshouse-platform\
+
+## What exists
+- Next.js 15.5 App Router, Prisma 7-model schema (Tenant → Product/Category/Order/User/CateringInquiry)
+- Phase 1: middleware (x-tenant-host), tenant resolution (layout-based), Prisma singleton, auth stubs → now real, Stripe stub
+- Phase 2: NextAuth v5 credentials (JWT, bcryptjs), admin shell (sidebar, topbar, tenant switcher), product CRUD (soft-delete), categories, order management with status machine, catering inquiry management, settings (theme editor), admin dashboard with stats
+
+## Your job: Think deeply
+- What breaks at scale (100 tenants, 100k products)?
+- What race conditions exist in the status transitions or soft-delete?
+- What's missing that will bite during Phase 3 (Storefront), Phase 4 (Payments), Phase 5 (Multi-storefront)?
+- What's architecturally wrong — not style, not preference — structurally incorrect?
+- What database indexes are missing for the query patterns used?
+- What Next.js footguns are lurking (caching, dynamic/static, revalidation)?
+- What security boundaries are paper-thin?
+
+Focus on 8-12 findings. Each must be specific: file, line, what's wrong, and the concrete fix. Order by severity.
