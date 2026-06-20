@@ -31,8 +31,11 @@ model Tenant {
   orders            Order[]
   orderItems        OrderItem[]
   users             User[]
+  memberships       TenantMembership[]
   cateringInquiries CateringInquiry[]
   newsletterSignups NewsletterSignup[]
+  savedQueries      SavedQuery[]
+  wishlistItems     WishlistItem[]
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -70,7 +73,8 @@ model Product {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  orderItems OrderItem[]
+  orderItems    OrderItem[]
+  wishlistItems WishlistItem[]
 
   // COUNCIL FIX: products are addressed by slug within a tenant; slug must be
   // unique per tenant (not globally) so two stores can both have "ankara-tote-bag".
@@ -155,6 +159,30 @@ model User {
   tenant    Tenant?  @relation(fields: [tenantId], references: [id])
   createdAt DateTime @default(now())
 
+  // COUNCIL FIX (JH-004): TenantMembership replaces single tenantId for
+  // multi-tenant users. A user can belong to multiple tenants with different
+  // roles per tenant (e.g. TENANT_ADMIN on store A, CUSTOMER on store B).
+  // The existing tenantId field stays for backward compat — SUPER_ADMIN users
+  // (tenantId=null) still work. For TENANT_ADMIN users, migrate to memberships.
+  memberships TenantMembership[]
+
+  @@index([tenantId])
+}
+
+// COUNCIL FIX (JH-004): explicit many-to-many membership model.
+// Replaces the single User.tenantId for users who manage or shop at
+// multiple stores. One user can be a TENANT_ADMIN on store A and a
+// CUSTOMER on store B.
+model TenantMembership {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  role      UserRole @default(CUSTOMER) // role WITHIN this tenant
+  createdAt DateTime @default(now())
+
+  @@unique([userId, tenantId])
   @@index([tenantId])
 }
 
@@ -204,4 +232,38 @@ model NewsletterSignup {
   // One signup per email per tenant — re-subscribing is idempotent.
   @@unique([tenantId, email])
   @@index([tenantId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Admin Query Builder
+// ─────────────────────────────────────────────────────────────
+
+model SavedQuery {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name      String
+  config    Json     // { model, fields, filters, sort }
+  createdBy String   // User email
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Wishlist
+// ─────────────────────────────────────────────────────────────
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([tenantId, userId])
 }

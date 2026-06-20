@@ -40,32 +40,31 @@
 ## SPECIALIZED SEATS (The Three Variants)
 
 ### Seat 4 — THE MAKER (Reed-1610)
-- **CLI:** hermes chat -q (primary) or mixture_of_agents() (fallback)
-- **Model:** 4× free OpenRouter models + aggregator
-- **Cost:** $0.00 per invocation
-- **Role:** Radical synthesizer. Multi-perspective from Developer + Operator + Member views.
-- **Bridge lineup:** Nemotron 550B, Qwen3 80B, Hermes 3 405B, Llama 3.3 70B
+- **CLI:** pi v0.79.6
+- **Model:** gpt-5.4-mini (openai-codex)
+- **Cost:** $0.00 per invocation (sub included)
+- **Role:** Radical synthesizer. Multi-perspective from Developer + Store Owner + Customer views.
+- **Invocation:** `pi -p "synthesize: [problem]"`
 - **Signature:** "Project Oversight concurs. The Children have spoken."
 
 ### Seat 5 — THE ADVERSARY (Lex Luthor, Earth-38)
-- **CLI:** gemini v0.45.1
+- **CLI:** agy (antigravity)
 - **Model:** gemini-2.5-pro (primary), gemini-2.5-flash (fallback)
 - **Pool:** rivalkidchelsea@gmail.com — Google Pro $189/yr, unlimited, 5x limits
 - **Cost:** $0.00 per invocation (Pro sub)
 - **Role:** Kryptonite scans, exploit hunting, Anti-Monitor checks.
-- **Invocation:** `gemini --yolo -m gemini-2.5-pro -p "adversarial audit: [problem]"`
+- **Invocation:** `agy --print --print-timeout 300s --dangerously-skip-permissions -p "adversarial audit: [problem]"`
 - **Signature:** "I found your kryptonite. Fix it before someone else does."
-- **Pitfall:** gemini-2.5-pro can return empty response — fall back to flash. -y shorthand fails; use --yolo.
+- **Pitfall:** agy --print can return empty response on large outputs — use --print-timeout generously. agy respects .gitignore — can't read .doa/ directly.
 
 ### Seat 6 — THE ARCHIVIST (Doom 2099, Earth-928)
-- **CLI:** gemini v0.45.1 (**independent** — runs on its own, NOT a subagent)
-- **Model:** gemini-2.5-flash
-- **Pool:** tevin.clubright@gmail.com — Google AI Studio free, 1000 req/day
-- **Cost:** $0.00 per invocation (free tier)
+- **CLI:** pi v0.79.6 (**independent** — runs on its own, NOT a subagent)
+- **Model:** gpt-5.4-mini (openai-codex)
+- **Cost:** $0.00 per invocation (sub included)
 - **Role:** Cross-session pattern tracking, institutional memory, anti-pattern documentation.
-- **Invocation:** `GOOGLE_API_KEY=*** gemini --yolo -m gemini-2.5-flash -p "pattern check: [problem]"`
+- **Invocation:** `pi -p "pattern check: [problem]"`
 - **Signature:** "Doom has archived this. It will not be forgotten."
-- **Pitfall:** Gemini CLI respects .gitignore — can't read .doa/. Hermes proxies.
+- **Pitfall:** Pi loads archivist extension — uses archivist skills/tools. Runs independently.
 
 ---
 
@@ -113,7 +112,7 @@ Every Council seat must evaluate against all four persona jurors.
 | Thinker (Codex) | 0-1 | Plus pool (cached) |
 | Maker (Reed) | 1 | $0 |
 | Adversary (Lex) | 1 | $0 (Pro sub) |
-| Archivist (Doom) | 1 | $0 (free tier) |
+| Archivist (Doom) | 1 | $0 (sub included) |
 | **TOTAL** | ~7 | $0 + Claude pool |
 
 ---
@@ -126,5 +125,5 @@ Every Council seat must evaluate against all four persona jurors.
 4. **Codex gets lost in node_modules/.** Add file-pattern guidance: "Focus on src/, skip node_modules/."
 5. **OpenCode broken claim was stale.** Always verify with opencode --version before declaring unavailable.
 6. **Screenshots are the golden parachute.** Evidence before commit, always. Even if it means taskkill.
-7. **Gemini CLI respects .gitignore.** Can't read .doa/. Hermes proxies for Archivist.
-8. **Doom is INDEPENDENT.** Runs on its own CLI, not as a subagent. Separate Google account.
+7. **agy --print can return empty on large context.** Use --print-timeout 300s minimum for Adversary scans.
+8. **Doom is INDEPENDENT.** Runs on its own Pi CLI with archivist extension. Not a subagent.

@@ -44,12 +44,12 @@
   /* Tenant theming hooks (defaulted to brand; overridden per tenant). */
   --tenant-primary: var(--primary);
   --tenant-secondary: var(--secondary);
-  --tenant-font: "DM Sans", "Segoe UI", sans-serif;
+  --tenant-font: "Hanken Grotesk", "Segoe UI", sans-serif;
 }
 
-/* Storefront display headings use Playfair (loaded as --font-heading). */
+/* Storefront display headings use Marcellus (loaded as --font-heading). */
 .font-heading {
-  font-family: var(--font-heading), "Playfair Display", Georgia, serif;
+  font-family: var(--font-heading), "Marcellus", Georgia, serif;
 }
 
 @theme inline {

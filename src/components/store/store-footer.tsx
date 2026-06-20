@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { NewsletterForm } from "@/components/store/newsletter-form";
 
 const SHOP_LINKS = [
   { slug: "women", label: "Women" },
@@ -15,16 +14,6 @@ export function StoreFooter() {
   return (
     <footer className="mt-20 bg-[var(--foreground)] text-[#d4c8b8]">
       <div className="mx-auto max-w-[1400px] px-6 py-14">
-        <div className="mb-12 max-w-xl">
-          <h3 className="font-heading text-xl font-bold italic text-white">
-            Join the Family
-          </h3>
-          <p className="mb-4 mt-1 text-sm text-[#b8a896]">
-            New collections, restocks, and 10% off your first order.
-          </p>
-          <NewsletterForm />
-        </div>
-
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="font-heading text-lg font-bold italic text-white">
@@ -113,6 +102,7 @@ export function StoreFooter() {
         </div>
 
         <div className="mt-12 border-t border-white/10 pt-6 text-center text-xs text-[#9a8b7d]">
+          <div className="mb-2">Pay in ¥ JPY · £ GBP · $ USD · € EUR · CFA Franc (XOF)</div>
           © 2025 Jazy&apos;s House Tokyo. All rights reserved. Made with love.
         </div>
       </div>

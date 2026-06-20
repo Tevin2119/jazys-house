@@ -32,17 +32,41 @@ function parseProductForm(formData: FormData): ProductInput {
   const badge = String(formData.get("badge") ?? "").trim();
   const stockRaw = String(formData.get("stock") ?? "").trim();
 
+  // COUNCIL FIX (JH-004): restrict image URLs to approved providers only.
+  // Arbitrary URLs are an SSRF vector — an admin could supply an internal
+  // endpoint (http://169.254.169.254/latest/meta-data/) and the server
+  // would fetch it when rendering/optimizing images.
+  const ALLOWED_IMAGE_HOSTS = [
+    /\.r2\.dev$/,                    // Cloudflare R2 public buckets
+    /^pub-[a-f0-9]+\.r2\.dev$/,     // R2 custom domains
+    /\.cloudflarestorage\.com$/,     // R2 S3-compatible endpoint
+    /\.supabase\.co$/,               // Supabase Storage
+    /^res\.cloudinary\.com$/,        // Cloudinary
+    /\.blob\.vercel-storage\.com$/,  // Vercel Blob
+  ];
+
+  function isAllowedImageUrl(url: string): boolean {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "https:") return false; // HTTPS only
+
+      // Block private/internal IPs (SSRF protection)
+      const BLOCKED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "[::1]"];
+      if (BLOCKED_HOSTS.includes(parsed.hostname)) return false;
+      if (parsed.hostname.match(/^10\.|^172\.(1[6-9]|2\d|3[01])\.|^192\.168\./)) return false;
+      if (parsed.hostname === "169.254.169.254") return false; // AWS metadata
+
+      // Allowlist check
+      return ALLOWED_IMAGE_HOSTS.some((pattern) => pattern.test(parsed.hostname));
+    } catch {
+      return false;
+    }
+  }
+
   const images = imagesRaw
     .split(/[\n,]/)
     .map((url) => url.trim())
-    .filter((url) => {
-      try {
-        const parsed = new URL(url);
-        return parsed.protocol === "http:" || parsed.protocol === "https:";
-      } catch {
-        return false;
-      }
-    });
+    .filter(isAllowedImageUrl);
 
   const parsedStock = Number.parseInt(stockRaw, 10);
 

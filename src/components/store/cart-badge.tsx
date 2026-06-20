@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { CART_EVENT, cartCount } from "@/lib/cart";
 
 /**
- * Cart count badge in the nav. Hydrates from localStorage on mount and stays in
- * sync via the in-tab cart event plus the cross-tab `storage` event.
+ * Cart count badge. Two modes:
+ * - Default: absolute-positioned bubble (for use on an icon/emoji).
+ * - `inline`: plain text span showing the count (for use inside a pill button).
  */
-export function CartBadge() {
+export function CartBadge({ inline = false }: { inline?: boolean }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -22,6 +23,10 @@ export function CartBadge() {
   }, []);
 
   if (count <= 0) return null;
+
+  if (inline) {
+    return <span className="font-bold">{count}</span>;
+  }
 
   return (
     <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[0.65rem] font-bold text-primary-foreground">

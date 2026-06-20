@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { addItem, type CartItem } from "@/lib/cart";
 import { cn } from "@/lib/utils";
+import { capturePostHogEvent } from "@/lib/posthog";
 
 /**
  * Add-to-cart button (Client Component). Writes the line to the localStorage
@@ -11,10 +12,12 @@ import { cn } from "@/lib/utils";
  */
 export function AddToCartButton({
   product,
+  currency,
   className,
   label = "Add to Cart",
 }: {
   product: Omit<CartItem, "quantity">;
+  currency?: string;
   className?: string;
   label?: string;
 }) {
@@ -22,6 +25,13 @@ export function AddToCartButton({
 
   function handleAdd() {
     addItem(product);
+    capturePostHogEvent("add_to_cart", {
+      product_id: product.productId,
+      product_name: product.name,
+      price: product.price / 100,
+      ...(currency ? { currency } : {}),
+      quantity: 1,
+    });
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1500);
   }

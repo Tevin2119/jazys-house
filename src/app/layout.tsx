@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
-import { Playfair_Display, DM_Sans } from "next/font/google";
+import { Marcellus, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
+import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
+import { Providers } from "./providers";
+import { auth } from "@/auth";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-const playfair = Playfair_Display({
+const marcellus = Marcellus({
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-heading",
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+const hankenGrotesk = Hanken_Grotesk({
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
@@ -41,14 +46,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await auth();
   return (
     <html lang="en">
-      <body className={`${playfair.variable} ${dmSans.variable}`}>
-        {children}
-        <PwaRegister />
+      <body className={`${marcellus.variable} ${hankenGrotesk.variable}`}>
+        <Providers session={session}>
+          {children}
+          <PwaRegister />
+          <AnalyticsProvider />
+        </Providers>
       </body>
     </html>
   );

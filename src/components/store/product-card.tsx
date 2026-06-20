@@ -4,6 +4,8 @@ import { formatPrice } from "@/lib/utils";
 import { ProductImage } from "@/components/store/product-image";
 import { ProductBadge } from "@/components/store/product-badge";
 import { AddToCartButton } from "@/components/store/add-to-cart-button";
+import { ProductViewTracker } from "@/components/analytics/product-view-tracker";
+import { WishlistButton } from "@/components/store/wishlist-button";
 
 /**
  * Catalog product card. The card body links to the product detail page; the
@@ -14,28 +16,44 @@ export function ProductCard({
   product,
   categoryName,
   currency,
+  tenantId,
+  tenantName,
 }: {
   product: Product;
   categoryName?: string | null;
   currency: string;
+  tenantId?: string;
+  tenantName?: string;
 }) {
   const image = product.images[0] ?? null;
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-[var(--shadow-lg,0_12px_40px_rgba(44,24,16,0.1))]">
-      <Link href={`/shop/${product.slug}`} className="relative block">
-        <ProductImage
-          image={image}
-          emoji={product.emoji}
-          alt={product.name}
-          className="aspect-[3/4] w-full transition-transform duration-300 group-hover:scale-[1.03]"
-        />
+      <ProductViewTracker
+        productId={product.id}
+        name={product.name}
+        category={categoryName}
+        price={product.price}
+        currency={currency}
+        tenantId={tenantId}
+        tenantName={tenantName}
+      />
+      <div className="relative">
+        <Link href={`/shop/${product.slug}`} className="block">
+          <ProductImage
+            image={image}
+            emoji={product.emoji}
+            alt={product.name}
+            className="aspect-[3/4] w-full transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        </Link>
         {product.badge ? (
           <div className="absolute left-3 top-3">
             <ProductBadge label={product.badge} badgeClass={product.badgeClass} />
           </div>
         ) : null}
-      </Link>
+        <WishlistButton productId={product.id} />
+      </div>
 
       <div className="flex flex-1 flex-col gap-1 p-4">
         {categoryName ? (
@@ -60,6 +78,7 @@ export function ProductCard({
               image,
               emoji: product.emoji,
             }}
+            currency={currency}
           />
         </div>
       </div>

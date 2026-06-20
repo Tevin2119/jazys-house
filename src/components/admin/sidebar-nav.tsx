@@ -2,29 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Package,
-  FolderTree,
-  ShoppingCart,
-  UtensilsCrossed,
-  Settings,
-  Building2,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/products", label: "Products", icon: Package, exact: false },
-  { href: "/admin/categories", label: "Categories", icon: FolderTree, exact: false },
-  { href: "/admin/orders", label: "Orders", icon: ShoppingCart, exact: false },
-  { href: "/admin/catering", label: "Catering", icon: UtensilsCrossed, exact: false },
-  { href: "/admin/settings", label: "Settings", icon: Settings, exact: false },
+  { href: "/admin", label: "Dashboard", icon: "📊", exact: true },
+  { href: "/admin/products", label: "Products", icon: "🧺", exact: false },
+  { href: "/admin/orders", label: "Orders", icon: "📦", exact: false },
+  { href: "/admin/catering", label: "Catering", icon: "🍲", exact: false },
+  { href: "/admin/customers", label: "Customers", icon: "👥", exact: false },
+  { href: "/admin/metrics", label: "Metrics", icon: "📈", exact: false },
+  { href: "/admin/query-builder", label: "Queries", icon: "🔍", exact: false },
+  { href: "/admin/settings", label: "Settings", icon: "⚙️", exact: false },
 ] as const;
 
-// SUPER_ADMIN-only routes (cross-tenant management).
 const SUPER_ADMIN_NAV = [
-  { href: "/admin/tenants", label: "Stores", icon: Building2, exact: false },
+  { href: "/admin/users", label: "Users", icon: "🔑", exact: false },
+  { href: "/admin/tenants", label: "Stores", icon: "🏪", exact: false },
 ] as const;
 
 export function SidebarNav({
@@ -39,7 +32,7 @@ export function SidebarNav({
 
   return (
     <nav className="flex flex-col gap-1 p-3">
-      {items.map(({ href, label, icon: Icon, exact }) => {
+      {items.map(({ href, label, icon, exact }) => {
         const active = exact
           ? pathname === href
           : pathname === href || pathname.startsWith(`${href}/`);
@@ -49,13 +42,13 @@ export function SidebarNav({
             href={href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-3 rounded-[9px] px-3 py-2.5 text-sm font-medium transition-colors",
               active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                ? "bg-[#c0563d] font-bold text-white"
+                : "font-[500] text-[#cbb9a3] hover:bg-[#3d2a1e] hover:text-white",
             )}
           >
-            <Icon className="size-4 shrink-0" />
+            <span className="text-base leading-none">{icon}</span>
             {label}
           </Link>
         );

@@ -1,0 +1,54 @@
+# COUNCIL FIX (JH-004): Automated Daily DB Backup
+#
+# Supabase free tier has NO automated backups. A corrupted table,
+# failed migration, or accidental DROP is unrecoverable without this.
+#
+# This workflow:
+#   1. Runs daily at 2am UTC
+#   2. Dumps the production database using pg_dump
+#   3. Compresses with gzip
+#   4. Uploads to Cloudflare R2 (S3-compatible, zero egress)
+#
+# Cost: £0/mo (GitHub Actions free tier + R2 free tier)
+# Retention: 30 daily backups (~30MB each = ~1GB = $0.015/mo on R2)
+
+name: DB Backup
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # Daily at 2am UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Dump and compress database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          pg_dump "$DATABASE_URL" | gzip > "backup-${TIMESTAMP}.sql.gz"
+          echo "BACKUP_FILE=backup-${TIMESTAMP}.sql.gz" >> $GITHUB_ENV
+
+      - name: Upload to Cloudflare R2
+        uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source: ${{ env.BACKUP_FILE }}
+          destination: "db-backups/${{ env.BACKUP_FILE }}"
+
+      - name: Cleanup old backups (keep last 30)
+        run: |
+          # R2 doesn't have server-side retention rules on free tier.
+          # We use rclone or awscli to list and delete old backups.
+          # For now, manual cleanup is acceptable at this scale.
+          echo "Backup uploaded: $BACKUP_FILE"

@@ -94,6 +94,8 @@ export default async function ShopPage({
               product={p}
               categoryName={p.category?.name}
               currency={tenant.currency}
+              tenantId={tenant.id}
+              tenantName={tenant.name}
             />
           ))}
         </div>
@@ -105,17 +107,35 @@ export default async function ShopPage({
           </h3>
           <p className="mt-2 text-muted-foreground">
             {q
-              ? `Nothing matched “${q}”. Try a different search or category.`
+              ? `Nothing matched "${q}". Try a different search or category.`
               : "There's nothing in this category yet."}
           </p>
           <Link
             href="/shop"
-            className="mt-6 inline-block rounded-md border border-border bg-card px-6 py-3 text-sm font-semibold transition-colors hover:bg-secondary"
+            className="mt-6 inline-block rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold transition-colors hover:bg-secondary"
           >
             View all products
           </Link>
         </div>
       )}
+
+      {/* MADE-TO-ORDER CTA */}
+      <div className="mt-16 rounded-2xl border-2 border-dashed border-[#d4a017] bg-[#fffdf9] p-10 text-center">
+        <div className="text-4xl">✂️</div>
+        <h2 className="mt-4 font-heading text-2xl text-foreground">
+          Made-To-Order Clothing
+        </h2>
+        <p className="mt-3 mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">
+          Can&apos;t find exactly what you&apos;re looking for? We craft bespoke African fashion pieces made to your measurements and style — Ankara, Kente, Mudcloth, and more.
+        </p>
+        <Link
+          href="mailto:faye.dienaba@yahoo.com?subject=Custom%20Order%20Request"
+          className="mt-6 inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-semibold text-white transition-colors hover:opacity-90"
+          style={{ background: "#2a1f16" }}
+        >
+          Request a Custom Piece →
+        </Link>
+      </div>
     </div>
   );
 }

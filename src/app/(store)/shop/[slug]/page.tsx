@@ -10,6 +10,7 @@ import { AddToCartButton } from "@/components/store/add-to-cart-button";
 import { ProductCard } from "@/components/store/product-card";
 import { SectionHeading } from "@/components/store/section";
 import { NoStore } from "@/components/store/no-store";
+import { ProductViewTracker } from "@/components/analytics/product-view-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,15 @@ export default async function ProductDetailPage({
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-12">
+      <ProductViewTracker
+        productId={product.id}
+        name={product.name}
+        category={product.category?.name}
+        price={product.price}
+        currency={tenant.currency}
+        tenantId={tenant.id}
+        tenantName={tenant.name}
+      />
       {/* BREADCRUMB */}
       <nav className="mb-8 text-sm text-muted-foreground" aria-label="Breadcrumb">
         <ol className="flex flex-wrap items-center gap-1.5">
@@ -137,6 +147,7 @@ export default async function ProductDetailPage({
                   image: firstImage,
                   emoji: product.emoji,
                 }}
+                currency={tenant.currency}
               />
             ) : (
               <button
@@ -157,7 +168,7 @@ export default async function ProductDetailPage({
           <SectionHeading title="You May Also Like" />
           <div className="mt-10 grid grid-cols-2 gap-5 md:grid-cols-4">
             {related.map((p) => (
-              <ProductCard key={p.id} product={p} currency={tenant.currency} />
+              <ProductCard key={p.id} product={p} currency={tenant.currency} tenantId={tenant.id} tenantName={tenant.name} />
             ))}
           </div>
         </section>

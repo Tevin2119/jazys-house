@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { formatPrice } from "@/lib/utils";
 import { ClearCart } from "@/components/store/clear-cart";
 import { NoStore } from "@/components/store/no-store";
+import { OrderCompleteTracker } from "@/components/analytics/order-complete-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,12 @@ export default async function ConfirmationPage({
     <div className="mx-auto max-w-2xl px-6 py-20">
       {/* Order is persisted server-side; empty the client cart now. */}
       <ClearCart />
+      <OrderCompleteTracker
+        orderId={order.id}
+        total={order.total}
+        currency={order.currency}
+        itemCount={order.items.length}
+      />
 
       <div className="text-center">
         <div className="mb-4 text-6xl">🧡</div>

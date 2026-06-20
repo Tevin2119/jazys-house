@@ -5,6 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import { CART_EVENT, cartSubtotal, getCart, type CartItem } from "@/lib/cart";
 import { formatPrice } from "@/lib/utils";
 import { placeOrder, type CheckoutState } from "@/app/(store)/checkout/actions";
+import { capturePostHogEvent } from "@/lib/posthog";
 
 const INITIAL: CheckoutState = { ok: false };
 
@@ -72,9 +73,16 @@ export function CheckoutForm({ currency }: { currency: string }) {
     cart.map((i) => ({ productId: i.productId, quantity: i.quantity })),
   );
 
+  function handleCheckoutStart() {
+    capturePostHogEvent("checkout_started", {
+      items_count: cart.length,
+      subtotal: cartSubtotal(cart),
+    });
+  }
+
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_22rem]">
-      <form action={action} className="grid gap-4">
+      <form action={action} onSubmit={handleCheckoutStart} className="grid gap-4">
         <input type="hidden" name="cart" value={cartPayload} />
         <h2 className="font-heading text-xl font-bold italic">Shipping Details</h2>
         <div className="grid gap-4 sm:grid-cols-2">

@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 /** Build the next URL for a single param change, always resetting pagination. */
 function buildHref(
@@ -115,5 +116,60 @@ export function SelectFilter({
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+/**
+ * Horizontal pill-button filter row bound to a URL param.
+ * Replaces the SelectFilter dropdown with inline pill buttons.
+ */
+export function StatusPillFilter({
+  paramKey,
+  placeholder,
+  options,
+}: {
+  paramKey: string;
+  placeholder: string;
+  options: FilterOption[];
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const current = params.get(paramKey) ?? "all";
+
+  function select(value: string) {
+    router.replace(
+      buildHref(pathname, params, paramKey, value === "all" ? null : value),
+    );
+  }
+
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-0.5 [&::-webkit-scrollbar]:hidden">
+      <button
+        onClick={() => select("all")}
+        className={cn(
+          "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+          current === "all"
+            ? "border-[#c0563d] bg-[#c0563d] text-white"
+            : "border-border bg-card text-muted-foreground hover:border-[#c0563d] hover:text-[#c0563d]",
+        )}
+      >
+        {placeholder}
+      </button>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          onClick={() => select(o.value)}
+          className={cn(
+            "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+            current === o.value
+              ? "border-[#c0563d] bg-[#c0563d] text-white"
+              : "border-border bg-card text-muted-foreground hover:border-[#c0563d] hover:text-[#c0563d]",
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
   );
 }

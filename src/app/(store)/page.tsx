@@ -3,10 +3,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCurrentTenant } from "@/lib/tenant";
 import { getCatalog, getFeaturedProducts } from "@/lib/storefront";
-import { CATERING_PACKAGES } from "@/lib/catering-packages";
 import { ProductCard } from "@/components/store/product-card";
 import { SectionHeading } from "@/components/store/section";
 import { NoStore } from "@/components/store/no-store";
+import { NewsletterForm } from "@/components/store/newsletter-form";
 
 export const dynamic = "force-dynamic";
 
@@ -50,19 +50,80 @@ export default async function StoreHomePage() {
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-[var(--warm)]">
-        <div className="mx-auto grid max-w-[1400px] items-center gap-8 px-6 py-20 md:grid-cols-2 md:py-28">
-          <div>
-            <div className="mb-4 inline-block rounded-full bg-card px-4 py-1.5 text-xs font-medium tracking-wide text-muted-foreground shadow-sm">
-              African Fashion &amp; Healthy Good Food · Worldwide Delivery
-            </div>
-            <h1 className="font-heading text-5xl font-extrabold italic leading-[1.05] sm:text-6xl">
+      {/* MOBILE HERO — full-width image with dark gradient overlay */}
+      <section className="relative md:hidden" style={{ minHeight: "340px" }}>
+        <div className="absolute inset-0">
+          {featured[0]?.images?.[0] ? (
+            <Image
+              src={featured[0].images[0].startsWith("/") ? featured[0].images[0] : `/${featured[0].images[0]}`}
+              alt={featured[0].name}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <Image
+              src="/images/dress-navy-orange.jpg"
+              alt="African fashion"
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+          )}
+        </div>
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to top, rgba(42,31,22,0.88) 40%, rgba(42,31,22,0.15) 100%)" }}
+        />
+        <div className="relative flex flex-col justify-end px-6 pb-10" style={{ minHeight: "340px" }}>
+          <h1
+            className="font-heading font-normal leading-tight text-white"
+            style={{ fontSize: "clamp(32px,9vw,40px)" }}
+          >
+            African Fashion
+            <br />
+            Handmade with Soul
+          </h1>
+          <div className="mt-5 flex gap-3">
+            <Link
+              href="/shop"
+              className="rounded-full px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#a3442e]"
+              style={{ background: "#c0563d" }}
+            >
+              Shop Now
+            </Link>
+            <Link
+              href="/catering"
+              className="rounded-full border-2 border-white px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
+            >
+              Catering
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* HERO — desktop */}
+      <section className="hidden overflow-hidden bg-[#f6efe4] md:block">
+        <div className="mx-auto grid max-w-[1400px] items-center gap-0 md:grid-cols-2">
+          {/* Left: text */}
+          <div className="px-8 py-16 md:px-12 md:py-24 lg:px-16">
+            <p
+              className="mb-4 text-[11px] font-bold uppercase tracking-[2.5px]"
+              style={{ color: "#a3442e" }}
+            >
+              Handmade in small batches · Est. 2025
+            </p>
+            <h1
+              className="font-heading leading-[1.08]"
+              style={{ fontSize: "clamp(40px,5vw,62px)", fontWeight: 400, color: "#2a1f16" }}
+            >
               African Fashion
               <br />
-              <span className="text-primary">Handmade with Soul</span>
+              Handmade with Soul
             </h1>
-            <p className="mt-5 max-w-lg text-muted-foreground">
+            <p className="mt-5 max-w-lg text-[15px]" style={{ color: "#6b5d4f" }}>
               {tenant.name} — your home for African handmade fashion, pure
               African superfoods &amp; authentic African catering. Vibrant
               Ankara, Kente, Dashiki. Worn with pride, made with love.
@@ -70,26 +131,60 @@ export default async function StoreHomePage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/shop"
-                className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--accent-hover)]"
+                className="rounded-full px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#a3442e]"
+                style={{ background: "#c0563d" }}
               >
-                Shop Fashion
-              </Link>
-              <Link
-                href="/shop?cat=pantry"
-                className="rounded-md bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#2c1810] transition-opacity hover:opacity-90"
-              >
-                Shop Superfoods
+                Shop the Collection
               </Link>
               <Link
                 href="/catering"
-                className="rounded-md border border-border bg-card px-6 py-3 text-sm font-semibold transition-colors hover:bg-secondary"
+                className="rounded-full border-[1.5px] px-6 py-3.5 text-sm font-bold transition-colors hover:bg-[#f0e8da]"
+                style={{ borderColor: "#2a1f16", color: "#2a1f16" }}
               >
                 Book Catering
               </Link>
             </div>
           </div>
-          <div className="hidden items-center justify-center text-[12rem] md:flex">
-            🌍
+
+          {/* Right: product image with floating overlay card */}
+          <div className="relative hidden md:block" style={{ minHeight: "520px" }}>
+            {featured[0]?.images?.[0] ? (
+              <Image
+                src={featured[0].images[0].startsWith("/") ? featured[0].images[0] : `/${featured[0].images[0]}`}
+                alt={featured[0].name}
+                fill
+                sizes="50vw"
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <Image
+                src="/images/dress-navy-orange.jpg"
+                alt="African fashion"
+                fill
+                sizes="50vw"
+                className="object-cover"
+                priority
+              />
+            )}
+            {/* Floating overlay card */}
+            <div
+              className="absolute bottom-8 left-8 rounded-xl px-5 py-4"
+              style={{
+                background: "rgba(255,253,249,0.95)",
+                boxShadow: "0 18px 44px rgba(42,31,22,0.20)",
+              }}
+            >
+              <p
+                className="font-heading text-3xl font-normal leading-none"
+                style={{ color: "#c0563d" }}
+              >
+                100%
+              </p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-wider" style={{ color: "#6b5d4f" }}>
+                Handmade &amp; Authentic
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -117,7 +212,7 @@ export default async function StoreHomePage() {
         {featured.length > 0 ? (
           <div className="mt-12 grid grid-cols-2 gap-5 lg:grid-cols-4">
             {featured.map((p) => (
-              <ProductCard key={p.id} product={p} currency={tenant.currency} />
+              <ProductCard key={p.id} product={p} currency={tenant.currency} tenantId={tenant.id} tenantName={tenant.name} />
             ))}
           </div>
         ) : (
@@ -135,41 +230,84 @@ export default async function StoreHomePage() {
         </div>
       </section>
 
-      {/* CATERING TEASER */}
-      <section className="bg-[var(--warm)]">
-        <div className="mx-auto max-w-[1400px] px-6 py-20">
-          <SectionHeading
-            label="Catering"
-            title="The Taste of Home"
-            subtitle="Jollof rice, suya, braai, puff-puff… bring authentic African flavors to your next gathering."
+      {/* MOBILE CATERING PROMO */}
+      <section className="mx-6 my-10 overflow-hidden rounded-2xl md:hidden">
+        <div className="relative" style={{ minHeight: "200px" }}>
+          <Image
+            src="/images/chef-dienaba.jpg"
+            alt="Chef preparing authentic African food"
+            fill
+            sizes="100vw"
+            className="object-cover"
           />
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {CATERING_PACKAGES.slice(0, 3).map((c) => (
-              <div
-                key={c.value}
-                className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-              >
-                <div className="flex h-40 items-center justify-center bg-secondary/50 text-6xl">
-                  {c.emoji}
-                </div>
-                <div className="p-5">
-                  <h3 className="font-heading text-lg font-bold italic">
-                    {c.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{c.desc}</p>
-                  <div className="mt-3 font-semibold text-primary">{c.price}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-12 text-center">
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(192,86,61,0.92) 100%)" }}
+          />
+        </div>
+        <div className="px-6 pb-7 pt-5" style={{ background: "#c0563d" }}>
+          <h3
+            className="font-heading font-normal leading-tight text-white"
+            style={{ fontSize: "clamp(24px,6vw,30px)" }}
+          >
+            The Taste of Home
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.85)" }}>
+            Jollof rice, suya, puff-puff — authentic African catering for your next event.
+          </p>
+          <div className="mt-5">
             <Link
               href="/catering"
-              className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[var(--accent-hover)]"
+              className="inline-block rounded-full border-2 border-white px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[#c0563d]"
             >
               Explore Catering →
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* CATERING TEASER — full-bleed 2-col, desktop only */}
+      <section className="hidden md:grid md:grid-cols-2" style={{ minHeight: "440px" }}>
+        {/* Left: text panel on terracotta */}
+        <div
+          className="flex flex-col justify-center px-10 py-16 md:px-14 lg:px-20"
+          style={{ background: "#c0563d" }}
+        >
+          <p
+            className="mb-3 text-[11px] font-bold uppercase tracking-[2.5px]"
+            style={{ color: "rgba(255,255,255,0.7)" }}
+          >
+            Catering
+          </p>
+          <h2
+            className="font-heading leading-[1.1] text-white"
+            style={{ fontSize: "clamp(32px,3.5vw,44px)", fontWeight: 400 }}
+          >
+            The Taste of Home
+          </h2>
+          <p className="mt-4 max-w-sm text-[15px]" style={{ color: "rgba(255,255,255,0.85)" }}>
+            Jollof rice, suya, braai, puff-puff — bring authentic African
+            flavors to your next gathering.
+          </p>
+          <div className="mt-8">
+            <Link
+              href="/catering"
+              className="inline-block rounded-full border-2 border-white px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[#c0563d]"
+            >
+              Explore Catering →
+            </Link>
+          </div>
+        </div>
+
+        {/* Right: chef image */}
+        <div className="relative" style={{ minHeight: "440px" }}>
+          <Image
+            src="/images/chef-dienaba.jpg"
+            alt="Chef preparing authentic African food"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+          />
         </div>
       </section>
 
@@ -188,6 +326,8 @@ export default async function StoreHomePage() {
                 product={p}
                 categoryName={p.category?.name}
                 currency={tenant.currency}
+                tenantId={tenant.id}
+                tenantName={tenant.name}
               />
             ))}
           </div>
@@ -217,6 +357,21 @@ export default async function StoreHomePage() {
                 />
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* NEWSLETTER */}
+      <section className="py-20" style={{ background: "#2a1f16" }}>
+        <div className="mx-auto max-w-xl px-6 text-center">
+          <h2 className="font-heading text-3xl font-normal text-white">
+            Join the Family
+          </h2>
+          <p className="mb-8 mt-3 text-sm text-[#b8a896]">
+            New collections, restocks, and 10% off your first order.
+          </p>
+          <div className="flex justify-center">
+            <NewsletterForm cta="Join Now" pill />
           </div>
         </div>
       </section>

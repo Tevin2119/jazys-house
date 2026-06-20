@@ -7,24 +7,81 @@ import type { Prisma } from "@prisma/client";
 import { getAdminContext } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { formatPrice } from "@/lib/utils";
-import { PageHeader } from "@/components/admin/page-header";
-import { SearchInput, SelectFilter } from "@/components/admin/filters";
+import { SearchInput } from "@/components/admin/filters";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { deleteProduct, restoreProduct } from "./actions";
 
-/** True when a string looks like an absolute http(s) image URL. */
 function isAbsoluteUrl(value: string | undefined): value is string {
   return !!value && /^https?:\/\//i.test(value);
+}
+
+function StockStatusPill({ stock, deletedAt }: { stock: number; deletedAt: Date | null }) {
+  if (deletedAt) {
+    return (
+      <span
+        style={{
+          background: "#f0e8da",
+          color: "#8a7c6a",
+          padding: "3px 10px",
+          borderRadius: 999,
+          fontSize: 11.5,
+          fontWeight: 700,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Archived
+      </span>
+    );
+  }
+  if (stock === 0) {
+    return (
+      <span
+        style={{
+          background: "#f3dad4",
+          color: "#a3442e",
+          padding: "3px 10px",
+          borderRadius: 999,
+          fontSize: 11.5,
+          fontWeight: 700,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Out of stock
+      </span>
+    );
+  }
+  if (stock <= 8) {
+    return (
+      <span
+        style={{
+          background: "#fbe5cf",
+          color: "#9a6b1e",
+          padding: "3px 10px",
+          borderRadius: 999,
+          fontSize: 11.5,
+          fontWeight: 700,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Low stock
+      </span>
+    );
+  }
+  return (
+    <span
+      style={{
+        background: "#d8ecd9",
+        color: "#2f6b3a",
+        padding: "3px 10px",
+        borderRadius: 999,
+        fontSize: 11.5,
+        fontWeight: 700,
+        whiteSpace: "nowrap",
+      }}
+    >
+      In stock
+    </span>
+  );
 }
 
 export default async function ProductsPage({
@@ -41,148 +98,280 @@ export default async function ProductsPage({
   if (q) where.name = { contains: q, mode: "insensitive" };
   if (cat && cat !== "all") where.categoryId = cat;
 
-  const [products, categories] = await Promise.all([
+  const [products, totalCount] = await Promise.all([
     prisma.product.findMany({
       where,
       include: { category: true },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.category.findMany({
-      where: { tenantId },
-      orderBy: { name: "asc" },
-    }),
+    prisma.product.count({ where: { tenantId, deletedAt: null } }),
   ]);
 
   return (
     <div>
-      <PageHeader
-        title="Products"
-        action={
-          <Button asChild>
-            <Link href="/admin/products/new">New product</Link>
-          </Button>
-        }
-      />
-
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <SearchInput placeholder="Search products…" />
-        <SelectFilter
-          paramKey="cat"
-          placeholder="All categories"
-          options={categories.map((c) => ({ value: c.id, label: c.name }))}
-        />
-        <SelectFilter
-          paramKey="status"
-          placeholder="All statuses"
-          options={[
-            { value: "active", label: "Active" },
-            { value: "deleted", label: "Deleted" },
-          ]}
-        />
+      {/* Page header */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          marginBottom: 22,
+          flexWrap: "wrap",
+        }}
+      >
+        <div>
+          <h1
+            style={{
+              fontFamily: "'Marcellus', serif",
+              fontSize: 30,
+              margin: "0 0 4px",
+              fontWeight: 400,
+            }}
+          >
+            Products
+          </h1>
+          <p style={{ fontSize: 14, color: "#6b5d4f", margin: 0 }}>
+            {products.length} of {totalCount} products
+          </p>
+        </div>
+        <Link
+          href="/admin/products/new"
+          style={{
+            background: "#c0563d",
+            color: "#fff",
+            border: "none",
+            borderRadius: 9,
+            padding: "11px 20px",
+            fontSize: 14,
+            fontWeight: 700,
+            cursor: "pointer",
+            textDecoration: "none",
+            display: "inline-block",
+          }}
+        >
+          + Add Product
+        </Link>
       </div>
 
-      <div className="rounded-lg border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Product</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Stock</TableHead>
-              <TableHead>Badge</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No products found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              products.map((p) => {
-                const thumb = p.images[0];
-                const isDeleted = p.deletedAt !== null;
-                return (
-                  <TableRow key={p.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {isAbsoluteUrl(thumb) ? (
-                          <Image
-                            src={thumb}
-                            alt={p.name}
-                            width={40}
-                            height={40}
-                            className="size-10 rounded object-cover"
-                          />
-                        ) : (
-                          <span className="flex size-10 items-center justify-center rounded bg-muted text-xl">
-                            {p.emoji ?? "📦"}
-                          </span>
-                        )}
-                        <span className="font-medium">{p.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{p.category?.name ?? "—"}</TableCell>
-                    <TableCell>{formatPrice(p.price)}</TableCell>
-                    <TableCell>{p.stock}</TableCell>
-                    <TableCell>
-                      {p.badge ? (
-                        <Badge variant="secondary">{p.badge}</Badge>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {isDeleted ? (
-                        <Badge variant="outline">Deleted</Badge>
-                      ) : (
-                        <Badge>Active</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/admin/products/${p.id}/edit`}>
-                            Edit
-                          </Link>
-                        </Button>
-                        {isDeleted ? (
-                          <form action={restoreProduct}>
-                            <input type="hidden" name="id" value={p.id} />
-                            <ConfirmSubmitButton
-                              variant="ghost"
-                              size="sm"
-                              confirmText="Restore this product?"
-                            >
-                              Restore
-                            </ConfirmSubmitButton>
-                          </form>
-                        ) : (
-                          <form action={deleteProduct}>
-                            <input type="hidden" name="id" value={p.id} />
-                            <ConfirmSubmitButton
-                              variant="ghost"
-                              size="sm"
-                              confirmText="Soft-delete this product?"
-                            >
-                              Delete
-                            </ConfirmSubmitButton>
-                          </form>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+      {/* Search */}
+      <div style={{ marginBottom: 18 }}>
+        <SearchInput placeholder="Search products…" />
+      </div>
+
+      {/* Mobile cards */}
+      <div className="flex flex-col gap-3 md:hidden">
+        {products.length === 0 ? (
+          <p
+            style={{
+              padding: "40px 0",
+              textAlign: "center",
+              color: "#8a7c6a",
+              fontSize: 14,
+            }}
+          >
+            No products found.
+          </p>
+        ) : (
+          products.map((p) => {
+            const thumb = p.images[0];
+            return (
+              <div
+                key={p.id}
+                style={{
+                  background: "#fffdf9",
+                  border: "1px solid #ece2d2",
+                  borderRadius: 12,
+                  padding: "11px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                }}
+              >
+                {isAbsoluteUrl(thumb) ? (
+                  <Image
+                    src={thumb}
+                    alt={p.name}
+                    width={42}
+                    height={42}
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 8,
+                      objectFit: "cover",
+                      flexShrink: 0,
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 8,
+                      background: "#e6dccb",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 18,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {p.emoji ?? "📦"}
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 13.5, color: "#2a1f16" }}>
+                    {p.name}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#6b5d4f" }}>
+                    {formatPrice(p.price)}
+                  </div>
+                </div>
+                <StockStatusPill stock={p.stock} deletedAt={p.deletedAt} />
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div
+        className="hidden md:block"
+        style={{
+          background: "#fffdf9",
+          border: "1px solid #ece2d2",
+          borderRadius: 13,
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "2.4fr 1fr 0.9fr 1.1fr 0.7fr",
+            padding: "13px 22px",
+            fontSize: 11,
+            letterSpacing: 1,
+            textTransform: "uppercase",
+            color: "#a39685",
+            fontWeight: 700,
+            borderBottom: "1px solid #f0e8da",
+          }}
+        >
+          <span>Product</span>
+          <span>Category</span>
+          <span>Price</span>
+          <span>Status</span>
+          <span />
+        </div>
+
+        {products.length === 0 ? (
+          <div
+            style={{
+              padding: "40px 22px",
+              textAlign: "center",
+              color: "#8a7c6a",
+              fontSize: 14,
+            }}
+          >
+            No products found.
+          </div>
+        ) : (
+          products.map((p) => {
+            const thumb = p.images[0];
+            return (
+              <div
+                key={p.id}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2.4fr 1fr 0.9fr 1.1fr 0.7fr",
+                  padding: "12px 22px",
+                  fontSize: 14,
+                  alignItems: "center",
+                  borderBottom: "1px solid #f4ecde",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  {isAbsoluteUrl(thumb) ? (
+                    <Image
+                      src={thumb}
+                      alt={p.name}
+                      width={42}
+                      height={42}
+                      style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 8,
+                        objectFit: "cover",
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 8,
+                        background: "#e6dccb",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 18,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {p.emoji ?? "📦"}
+                    </div>
+                  )}
+                  <span style={{ fontWeight: 600 }}>{p.name}</span>
+                </div>
+                <span style={{ color: "#6b5d4f", textTransform: "capitalize" }}>
+                  {p.category?.name ?? "—"}
+                </span>
+                <span style={{ fontWeight: 700 }}>{formatPrice(p.price)}</span>
+                <span>
+                  <StockStatusPill stock={p.stock} deletedAt={p.deletedAt} />
+                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <Link
+                    href={`/admin/products/${p.id}/edit`}
+                    style={{
+                      color: "#c0563d",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      textDecoration: "none",
+                    }}
+                  >
+                    Edit
+                  </Link>
+                  {p.deletedAt ? (
+                    <form action={restoreProduct}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <ConfirmSubmitButton
+                        variant="ghost"
+                        size="sm"
+                        confirmText="Restore this product?"
+                      >
+                        Restore
+                      </ConfirmSubmitButton>
+                    </form>
+                  ) : (
+                    <form action={deleteProduct}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <ConfirmSubmitButton
+                        variant="ghost"
+                        size="sm"
+                        confirmText="Soft-delete this product?"
+                      >
+                        Delete
+                      </ConfirmSubmitButton>
+                    </form>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

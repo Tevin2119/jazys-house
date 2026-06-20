@@ -17,6 +17,13 @@ export function middleware(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
 
   const requestHeaders = new Headers(request.headers);
+
+  // COUNCIL FIX: strip any client-supplied tenant headers BEFORE setting
+  // trusted server-derived values. An attacker sending x-tenant-slug or
+  // x-tenant-host can hijack the tenant context if these are blindly trusted.
+  requestHeaders.delete("x-tenant-slug");
+  requestHeaders.delete("x-tenant-host");
+
   requestHeaders.set("x-tenant-host", host);
 
   // Path-based routing: /store/<slug>/rest -> /rest, tenant = <slug>.

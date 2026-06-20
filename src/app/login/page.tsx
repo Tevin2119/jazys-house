@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { getSession, isAdminRole } from "@/lib/auth";
 import { LoginForm } from "@/components/auth/login-form";
 
 // Auth state is per-request — never statically prerendered.
@@ -7,7 +7,10 @@ export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
   const session = await getSession();
-  if (session) redirect("/admin");
+  if (session) {
+    if (isAdminRole(session.user.role)) redirect("/admin");
+    redirect("/account");
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted px-4">
@@ -17,7 +20,7 @@ export default async function LoginPage() {
             Jazy&apos;s House
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to the admin dashboard
+            Sign in to your account
           </p>
         </div>
         <LoginForm />

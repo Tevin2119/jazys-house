@@ -4,15 +4,10 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { getAdminContext } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { assertValidTheme } from "@/lib/theme";
+import { assertValidTheme, resolveTheme, isHexColor, DEFAULT_THEME } from "@/lib/theme";
 
-/**
- * Update the current tenant's store name and branding theme.
- *
- * The tenant scope is re-derived from the session — the form never supplies a
- * tenantId, and we update by `id: tenantId` so a tenant can only ever modify
- * its own record.
- */
+const VALID_CURRENCIES = new Set(["gbp", "jpy", "usd", "eur", "xof"]);
+
 export async function updateTenantSettings(formData: FormData): Promise<void> {
   const { tenantId } = await getAdminContext();
 
@@ -21,19 +16,33 @@ export async function updateTenantSettings(formData: FormData): Promise<void> {
     throw new Error("Store name is required.");
   }
 
-  // Validate operator-supplied branding (M7): hex colors, allowlisted font,
-  // safe logo reference. Throws a user-facing error on the first bad field.
-  const theme = assertValidTheme({
-    primary: formData.get("primary"),
-    secondary: formData.get("secondary"),
-    font: formData.get("font"),
-    logoUrl: formData.get("logoUrl"),
+  // Fetch existing theme so we can fill missing fields with current values
+  const existing = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { theme: true, currency: true },
   });
+  const existingTheme = resolveTheme(existing?.theme);
+
+  const primaryRaw = String(formData.get("primary") ?? "").trim();
+  const primary = isHexColor(primaryRaw) ? primaryRaw : existingTheme.primary;
+  const secondary = existingTheme.secondary || DEFAULT_THEME.secondary;
+  const font = existingTheme.font || DEFAULT_THEME.font;
+  const logoUrl = String(formData.get("logoUrl") ?? "").trim() || existingTheme.logoUrl || "";
+
+  const theme = assertValidTheme({ primary, secondary, font, logoUrl: logoUrl || undefined });
+
+  // Currency: validate and update if provided
+  const currencyRaw = String(formData.get("currency") ?? "").trim().toLowerCase();
+  const currency = VALID_CURRENCIES.has(currencyRaw) ? currencyRaw : (existing?.currency ?? "gbp");
 
   try {
     await prisma.tenant.update({
       where: { id: tenantId },
-      data: { name, theme: theme as unknown as Prisma.InputJsonValue },
+      data: {
+        name,
+        currency,
+        theme: theme as unknown as Prisma.InputJsonValue,
+      },
     });
   } catch (error) {
     console.error("Failed to update tenant settings:", error);

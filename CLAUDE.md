@@ -67,10 +67,18 @@ These are NOT loaded automatically. Read them when working on the relevant area:
 ### Start with a plan
 For anything beyond a trivial change, start in Plan mode. Iterate until solid, then execute.
 
+### Council Workflow
+When invoked as the Workhorse seat in the Council of Kangs:
+- **Investigation:** Read `.doa/council/<TICKET>/brief.md`, trace code paths, report findings to `claude-investigation.md`
+- **Planning:** Create implementation plan from investigation findings, write to `plan.md`
+- **Implementation:** Build per approved plan. Run `npm run build` to verify. Write summary. Do NOT commit unless instructed.
+- **Council artifacts live in `.doa/council/<TICKET>/`**
+
 ### Verify your work
 - Build: `npm run build` to catch TS errors
-- Tests: `npx playwright test` for E2E
-- Dev server: `npm run dev` and visually verify in browser
+- Type check: `npx tsc --noEmit`
+- Lint: `npx next lint`
+- Dev server: `npm run dev` (port 3000)
 
 ### Document what you learn
 When you discover something non-obvious — a Stripe edge case, a Prisma quirk, a tenant resolution gotcha — write it down. Future sessions won't have your context.
