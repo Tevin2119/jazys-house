@@ -1,0 +1,3 @@
+error: invalid value 'Read .doa/council/JH-011/claude-investigation.md. Analyze JH-011 expansion: architectural gaps, DB schema implications, security risks, scalability. Be contrarian where justified. Write to .doa/council/JH-011/codex-think.md' for '--profile <CONFIG_PROFILE_V2>': invalid --profile value `Read .doa/council/JH-011/claude-investigation.md. Analyze JH-011 expansion: architectural gaps, DB schema implications, security risks, scalability. Be contrarian where justified. Write to .doa/council/JH-011/codex-think.md`; pass a plain name such as `work`
+
+For more information, try '--help'.
