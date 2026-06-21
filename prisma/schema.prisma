@@ -188,6 +188,9 @@ model TenantMembership {
 
 enum UserRole {
   SUPER_ADMIN
+  OWNER
+  ADMIN
+  EMPLOYEE
   TENANT_ADMIN
   CUSTOMER
 }
