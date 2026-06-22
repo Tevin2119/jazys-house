@@ -8,20 +8,17 @@ import { stripe, verifyCart, type CartLine, type VerifiedLine } from "@/lib/stri
 export interface CheckoutState {
   ok: boolean;
   error?: string;
-  /** Stripe Checkout URL — when present, the client redirects the browser here. */
+  /** Stripe Checkout URL (card payments). */
   url?: string;
+  /** Order ID returned for non-Stripe payment methods. */
+  orderId?: string;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Parse the client cart payload into trusted {productId, quantity} lines. */
 function parseLines(raw: string): CartLine[] {
   let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return [];
-  }
+  try { parsed = JSON.parse(raw); } catch { return []; }
   if (!Array.isArray(parsed)) return [];
   const lines: CartLine[] = [];
   for (const entry of parsed) {
@@ -35,12 +32,6 @@ function parseLines(raw: string): CartLine[] {
   return lines;
 }
 
-/**
- * Build the absolute origin for Stripe redirect URLs.
- * Prefer the request host so the customer returns to the SAME storefront they
- * checked out from (tenant subdomain / custom domain). Falls back to the
- * configured app URL for contexts without a host header.
- */
 async function requestOrigin(): Promise<string> {
   const h = await headers();
   const host = h.get("x-tenant-host") ?? h.get("host");
@@ -49,13 +40,6 @@ async function requestOrigin(): Promise<string> {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
-/**
- * Compensating action: cancel an order and return its reserved stock.
- *
- * Called when Stripe session creation fails AFTER the order + stock decrement
- * have committed. Without this the stock would be silently lost (reserved for an
- * order that can never be paid).
- */
 async function cancelAndRestock(
   tenantId: string,
   orderId: string,
@@ -75,75 +59,85 @@ async function cancelAndRestock(
       });
     });
   } catch (err) {
-    // Last-resort: log so the order can be reconciled manually. Never throw from
-    // a compensating path — the caller is already returning an error to the user.
     console.error("[checkout] failed to restock cancelled order", orderId, err);
   }
 }
 
 /**
- * Place an order and start Stripe Checkout.
+ * Place an order with Japanese address fields and payment method selection.
  *
- * Trust boundary (COUNCIL C1/C2): the tenant is resolved from the host, the cart
- * is re-priced against the DB via `verifyCart` (client prices are ignored), and
- * every OrderItem carries the tenantId so order lines can never reference another
- * store's products.
- *
- * COUNCIL H2 (stock oversell): the order + per-line stock decrement run in a
- * single interactive transaction. Each decrement is a conditional write
- * (`stock >= quantity`); if any line is short, the whole transaction rolls back
- * and no order is created. This is atomic — never check-then-write.
+ * Card payments → Stripe Checkout (returns url).
+ * Non-card payments → order created in PENDING state, returns orderId for
+ *   confirmation page. Actual KOMOJU integration wired in a later task (G-69–71).
  */
 export async function placeOrder(
   _prev: CheckoutState,
   formData: FormData,
 ): Promise<CheckoutState> {
   const tenant = await getCurrentTenant();
-  if (!tenant) return { ok: false, error: "Store not found for this address." };
+  if (!tenant) return { ok: false, error: "ストアが見つかりません。" };
 
-  const name = String(formData.get("name") ?? "").trim();
+  // Name
+  const lastName  = String(formData.get("lastName")  ?? "").trim();
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastNameKana  = String(formData.get("lastNameKana")  ?? "").trim();
+  const firstNameKana = String(formData.get("firstNameKana") ?? "").trim();
+  const name = [lastName, firstName].filter(Boolean).join(" ");
+
+  // Contact
   const email = String(formData.get("email") ?? "").trim();
-  const line1 = String(formData.get("address1") ?? "").trim();
-  const city = String(formData.get("city") ?? "").trim();
-  const postalCode = String(formData.get("postalCode") ?? "").trim();
-  const country = String(formData.get("country") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
+
+  // Address
+  const postalCode   = String(formData.get("postalCode")   ?? "").trim().replace(/[^0-9]/g, "");
+  const prefecture   = String(formData.get("prefecture")   ?? "").trim();
+  const city         = String(formData.get("city")         ?? "").trim();
+  const addressLine1 = String(formData.get("addressLine1") ?? "").trim();
+  const addressLine2 = String(formData.get("addressLine2") ?? "").trim();
+
+  const paymentMethod = String(formData.get("paymentMethod") ?? "card").trim();
   const lines = parseLines(String(formData.get("cart") ?? "[]"));
 
-  if (!name || !email || !line1 || !city || !postalCode || !country) {
-    return { ok: false, error: "Please complete every shipping field." };
-  }
-  if (!EMAIL_RE.test(email)) {
-    return { ok: false, error: "Please enter a valid email address." };
-  }
-  if (lines.length === 0) {
-    return { ok: false, error: "Your cart is empty." };
-  }
+  // Validation
+  if (!lastName || !firstName)
+    return { ok: false, error: "お名前（姓・名）を入力してください。" };
+  if (!EMAIL_RE.test(email))
+    return { ok: false, error: "有効なメールアドレスを入力してください。" };
+  if (!phone)
+    return { ok: false, error: "電話番号を入力してください。" };
+  if (!postalCode || !prefecture || !city || !addressLine1)
+    return { ok: false, error: "住所を完全に入力してください（郵便番号・都道府県・市区町村・番地）。" };
+  if (lines.length === 0)
+    return { ok: false, error: "カートが空です。" };
+
+  const address = {
+    postalCode,
+    prefecture,
+    city,
+    line1: addressLine1,
+    ...(addressLine2 && { line2: addressLine2 }),
+    ...(lastNameKana  && { lastNameKana }),
+    ...(firstNameKana && { firstNameKana }),
+    country: "JP",
+  };
 
   let orderId: string;
   let items: VerifiedLine[];
   try {
-    // Authoritative re-pricing from the DB (throws on missing/oversold lines).
     const verified = await verifyCart(tenant.id, lines);
     items = verified.items;
-    const subtotal = verified.total; // item lines before shipping
-    const shippingTotal = 0; // shipping calculated post-checkout for now
+    const subtotal = verified.total;
+    const shippingTotal = 0;
     const total = subtotal + shippingTotal;
 
     const order = await prisma.$transaction(async (tx) => {
-      // H2: atomic conditional stock decrement, one line at a time. The
-      // `stock: { gte: quantity }` guard means a concurrent order that drained
-      // the shelf makes count === 0 here, which throws and rolls everything back.
       for (const i of items) {
         const res = await tx.product.updateMany({
           where: { id: i.productId, tenantId: tenant.id, stock: { gte: i.quantity } },
           data: { stock: { decrement: i.quantity } },
         });
-        if (res.count !== 1) {
-          throw new Error(`Insufficient stock for ${i.name}`);
-        }
+        if (res.count !== 1) throw new Error(`「${i.name}」の在庫が不足しています`);
       }
-
       return tx.order.create({
         data: {
           tenantId: tenant.id,
@@ -155,20 +149,15 @@ export async function placeOrder(
           name,
           email,
           phone: phone || undefined,
-          address: {
-            line1,
-            city,
-            postalCode,
-            country,
-            ...(phone && { phone }),
-          },
+          address,
+          paymentProvider: paymentMethod === "card" ? "STRIPE" : "KOMOJU",
+          paymentMethod,
           items: {
             create: items.map((i) => ({
-              // C2: every line is scoped to the same tenant as the order.
               tenantId: tenant.id,
               productId: i.productId,
               quantity: i.quantity,
-              price: i.unitPrice, // snapshot at time of order
+              price: i.unitPrice,
             })),
           },
         },
@@ -176,13 +165,17 @@ export async function placeOrder(
     });
     orderId = order.id;
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Could not place your order.";
+    const message = err instanceof Error ? err.message : "注文の処理に失敗しました。";
     return { ok: false, error: message };
   }
 
-  // Order + stock are committed. Create the Stripe Checkout session from the
-  // VERIFIED line items (never the client payload).
+  // Non-card payments: order is placed in PENDING; return orderId for client redirect.
+  // KOMOJU session creation will be wired in a later task.
+  if (paymentMethod !== "card") {
+    return { ok: true, orderId };
+  }
+
+  // Card → Stripe Checkout
   const origin = await requestOrigin();
   try {
     const session = await stripe.checkout.sessions.create({
@@ -192,19 +185,18 @@ export async function placeOrder(
         quantity: i.quantity,
         price_data: {
           currency: tenant.currency,
-          unit_amount: i.unitPrice, // already minor units
+          unit_amount: i.unitPrice,
           product_data: { name: i.name },
         },
       })),
       success_url: `${origin}/checkout/confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/cart`,
-      // The webhook trusts these to bind the session back to our order + tenant.
       metadata: { orderId, tenantId: tenant.id },
     });
 
     if (!session.url) {
       await cancelAndRestock(tenant.id, orderId, items);
-      return { ok: false, error: "Could not start payment. Please try again." };
+      return { ok: false, error: "決済を開始できませんでした。もう一度お試しください。" };
     }
 
     await prisma.order.updateMany({
@@ -216,6 +208,6 @@ export async function placeOrder(
   } catch (err) {
     console.error("[checkout] stripe session creation failed", err);
     await cancelAndRestock(tenant.id, orderId, items);
-    return { ok: false, error: "Could not start payment. Please try again." };
+    return { ok: false, error: "決済を開始できませんでした。もう一度お試しください。" };
   }
 }

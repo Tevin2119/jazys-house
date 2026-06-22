@@ -5,18 +5,22 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/admin", label: "Dashboard", icon: "📊", exact: true },
-  { href: "/admin/products", label: "Products", icon: "🧺", exact: false },
-  { href: "/admin/orders", label: "Orders", icon: "📦", exact: false },
-  { href: "/admin/catering", label: "Catering", icon: "🍲", exact: false },
-  { href: "/admin/customers", label: "Customers", icon: "👥", exact: false },
-  { href: "/admin/metrics", label: "Metrics", icon: "📈", exact: false },
-  { href: "/admin/query-builder", label: "Queries", icon: "🔍", exact: false },
-  { href: "/admin/settings", label: "Settings", icon: "⚙️", exact: false },
+  { href: "/admin",             label: "Dashboard",    icon: "📊", exact: true },
+  { href: "/admin/products",    label: "Products",     icon: "🧺", exact: false },
+  { href: "/admin/orders",      label: "Orders",       icon: "📦", exact: false },
+  { href: "/admin/refunds",     label: "Refunds",      icon: "↩️", exact: false },
+  { href: "/admin/messages",    label: "Messages",     icon: "💬", exact: false },
+  { href: "/admin/catering",    label: "Catering",     icon: "🍲", exact: false },
+  { href: "/admin/customers",   label: "Customers",    icon: "👥", exact: false },
+  { href: "/admin/employees",   label: "Employees",    icon: "👤", exact: false },
+  { href: "/admin/metrics",     label: "Metrics",      icon: "📈", exact: false },
+  { href: "/admin/query-builder", label: "Queries",   icon: "🔍", exact: false },
+  { href: "/admin/integrations", label: "Integrations", icon: "🔌", exact: false },
+  { href: "/admin/settings",    label: "Settings",     icon: "⚙️", exact: false },
 ] as const;
 
 const SUPER_ADMIN_NAV = [
-  { href: "/admin/users", label: "Users", icon: "🔑", exact: false },
+  { href: "/admin/users",   label: "Users",  icon: "🔑", exact: false },
   { href: "/admin/tenants", label: "Stores", icon: "🏪", exact: false },
 ] as const;
 
