@@ -8,6 +8,11 @@ import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
 import { AdminTabBar } from "./admin-tab-bar";
 
+interface BadgeCounts {
+  pendingOrders: number;
+  unreadMessages: number;
+}
+
 interface AdminShellProps {
   user: { name: string | null; email: string; role: string };
   tenants: TenantOption[];
@@ -15,6 +20,7 @@ interface AdminShellProps {
   activeTenantName: string | null;
   activeTenantLogoUrl: string | null;
   isSuperAdmin: boolean;
+  badgeCounts: BadgeCounts;
   children: ReactNode;
 }
 
@@ -25,6 +31,7 @@ export function AdminShell({
   activeTenantName,
   activeTenantLogoUrl,
   isSuperAdmin,
+  badgeCounts,
   children,
 }: AdminShellProps) {
   const [open, setOpen] = useState(false);
@@ -128,6 +135,7 @@ export function AdminShell({
           <SidebarNav
             onNavigate={() => setOpen(false)}
             isSuperAdmin={isSuperAdmin}
+            badgeCounts={badgeCounts}
           />
         </div>
 
@@ -223,7 +231,7 @@ export function AdminShell({
         <main className="p-8 pb-24 lg:pb-8">{children}</main>
       </div>
 
-      <AdminTabBar />
+      <AdminTabBar badgeCounts={badgeCounts} />
     </div>
   );
 }

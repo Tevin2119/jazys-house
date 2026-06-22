@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { MessageSide } from "@prisma/client";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { resolveTheme } from "@/lib/theme";
@@ -49,6 +50,22 @@ export default async function AdminLayout({
     : null;
   const activeTenantLogoUrl = resolveTheme(activeTenant?.theme).logoUrl;
 
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const [pendingOrders, unreadMessages] = activeTenantId
+    ? await Promise.all([
+        prisma.order.count({
+          where: { tenantId: activeTenantId, status: "PENDING" },
+        }),
+        prisma.orderMessage.count({
+          where: {
+            tenantId: activeTenantId,
+            side: MessageSide.CUSTOMER,
+            createdAt: { gte: sevenDaysAgo },
+          },
+        }),
+      ])
+    : [0, 0];
+
   return (
     <SessionProvider session={session}>
       <AdminShell
@@ -62,6 +79,7 @@ export default async function AdminLayout({
         activeTenantName={activeTenantName}
         activeTenantLogoUrl={activeTenantLogoUrl}
         isSuperAdmin={isSuperAdmin}
+        badgeCounts={{ pendingOrders, unreadMessages }}
       >
         {children}
       </AdminShell>

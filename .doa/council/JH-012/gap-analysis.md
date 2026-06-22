@@ -2,6 +2,92 @@ The gap analysis is written to `.doa/council/JH-012/gap-analysis.md`. Here's the
 
 ---
 
+## Batch 5 Final Status (2026-06-22)
+
+### ✅ Closed (implemented across batches 1–5)
+
+| Gap | Area | Batch |
+|-----|------|-------|
+| G-05 | Sidebar nav grouping | 5 |
+| G-06 | Pending orders badge on Orders nav | 5 |
+| G-07 | Unread messages badge on Messages nav | 5 |
+| G-08 | New nav entries: Refunds, Messages, Employees, Integrations, Shipping | 5 |
+| G-09 | Mobile tab bar badge counts | 5 |
+| G-10 | Mobile "More" drawer with overflow items | 5 |
+| G-12 | OrderStatus expansion (LABEL_CREATED, IN_TRANSIT, REFUNDED) | 1 |
+| G-25 | Refund schema model | 1 |
+| G-26 | `/admin/refunds` page with stage pipeline | 2 |
+| G-27 | Refund review modal | 2 |
+| G-28 | REFUNDED auto-set when refund completes | 2 |
+| G-30 | OrderMessage schema model | 1 |
+| G-31 | `/admin/messages` inbox | 2/3 |
+| G-33 | Email templates UI (schema-pending for body edit) | 4 |
+| G-35 | `/admin/integrations` page | 2 |
+| G-36 | Carrier credential editor + test-connection | 4 |
+| G-40 | `/admin/employees` tenant-scoped list | 2/3 |
+| G-41 | Employee detail page + role toggle | 4 |
+| G-42 | Granular permissions grid | 4 |
+| G-45 | SVG revenue line chart (12-month) | 4 |
+| G-46 | SVG orders bar chart | 4 |
+| G-49 | AOV KPI | 4 |
+| G-50 | Grid ↔ Focus layout toggle | 4 |
+| G-51 | New customers KPI (distinct emails) | 4 |
+| G-58 | Carrier config stored in TenantCarrier model | 4 |
+| G-59 | `/admin/settings/carriers` page | 4 |
+| G-60 | Today's revenue KPI | 4 |
+| G-61 | "To ship" count KPI | 4 |
+| G-62 | Unread messages count KPI | 4 |
+| G-63 | Orders needing action list | 4 |
+| G-64 | Fulfillment summary widget | 4 |
+| G-65 | Catering this week | 4 |
+| G-66 | Japanese address fields in checkout | 3 |
+| G-68 | Structured address storage on Order | 1 |
+| G-72 | Payment method field on Order | 1 |
+| G-73 | Order tracking timeline (customer-facing) | 3 |
+
+### 🔄 Partially Done (UI built, schema/logic pending)
+
+| Gap | What's done | What's missing |
+|-----|-------------|----------------|
+| G-22 | Shipment model exists | Tracking timeline UI on order detail Shipping tab |
+| G-32 | Messages inbox exists | Reply input / thread view in admin |
+| G-34 | Unread count in sidebar + dashboard | No real `readAt` field — uses 7-day approximation |
+| G-37 | TenantCarrier model for carriers | Full Integration model for payment/email providers |
+| G-42 | Permissions grid renders | `TenantMembership.permissions` column needs `prisma db push` |
+| G-44 | Invite button placeholder | Email invite flow not wired |
+| G-48 | Refund count in dashboard | Refund rate KPI as % |
+| G-67 | Address field exists | JP postal code auto-lookup not wired |
+| G-70 | Payment method selector exists | KOMOJU backend not integrated |
+
+### ⏳ Remaining (future batches)
+
+| Gap | Area | Priority |
+|-----|------|----------|
+| G-01–G-04 | Admin panel header polish | P2 |
+| G-11 | Mobile FAB | P2 |
+| G-13 | Date filter chips on orders list | P1 |
+| G-14 | Aging dot on orders list | P1 |
+| G-15 | Priority star toggle | P2 |
+| G-16 | Bulk action bar | P1 |
+| G-17 | Mobile swipe hint | P2 |
+| G-18 | Order detail 4-tab layout | P0 |
+| G-19 | Itemized billing on order summary | P1 |
+| G-20 | Japanese address display on order | P1 |
+| G-21 | Create Label flow | P0 |
+| G-23 | Messages tab on order detail | P1 |
+| G-24 | History/audit log on order detail | P1 |
+| G-29 | Refund count badge in nav | P1 |
+| G-38/G-69–G-71 | KOMOJU full integration | P0 |
+| G-39 | Ship&co integration | P1 |
+| G-43 | Employee activity log | P2 |
+| G-47 | Payment methods pie chart | P2 |
+| G-52–G-57 | Catering detail + menu checklist | P1 |
+| G-75–G-78 | i18n / Japanese translations | P2 |
+
+---
+
+---
+
 ## JH-012 Gap Analysis — Summary
 
 **78 gaps cataloged** across 13 sections. Extracted by decoding the DC bundle's `renderVals()` method and comparing against 127 existing `src/` files.

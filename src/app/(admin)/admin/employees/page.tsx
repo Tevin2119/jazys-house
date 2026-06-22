@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { getAdminContext } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import Link from "next/link";
 import type { UserRole } from "@prisma/client";
 
 const ROLE_LABELS: Partial<Record<UserRole, string>> = {
@@ -52,8 +53,16 @@ export default async function EmployeesPage(): Promise<React.ReactElement> {
         <h1 style={{ fontFamily: "'Marcellus', serif", fontSize: 30, margin: 0, fontWeight: 400 }}>
           Employees
         </h1>
-        <div style={{ fontSize: 13, color: "#8a7c6a" }}>
-          {employees.length} member{employees.length !== 1 ? "s" : ""}
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <span style={{ fontSize: 13, color: "#8a7c6a" }}>
+            {employees.length} member{employees.length !== 1 ? "s" : ""}
+          </span>
+          <Link
+            href="#"
+            style={{ padding: "7px 16px", fontSize: 13, fontWeight: 700, borderRadius: 8, background: "#c0563d", color: "white", textDecoration: "none" }}
+          >
+            + Invite
+          </Link>
         </div>
       </div>
 
@@ -70,8 +79,9 @@ export default async function EmployeesPage(): Promise<React.ReactElement> {
             const bg     = avatarColor(m.user.id);
 
             return (
-              <div
+              <Link
                 key={m.id}
+                href={`/admin/employees/${m.id}`}
                 style={{
                   background: "#fffdf9",
                   border: "1px solid #ece2d2",
@@ -82,6 +92,9 @@ export default async function EmployeesPage(): Promise<React.ReactElement> {
                   alignItems: "center",
                   gap: 10,
                   textAlign: "center",
+                  textDecoration: "none",
+                  color: "inherit",
+                  transition: "border-color 0.15s",
                 }}
               >
                 {/* Avatar */}
@@ -130,7 +143,8 @@ export default async function EmployeesPage(): Promise<React.ReactElement> {
                   <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "#4ade80", marginRight: 4 }} />
                   Active · Joined {m.user.createdAt.toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
                 </div>
-              </div>
+                <div style={{ fontSize: 12, color: "#c0563d", fontWeight: 600, marginTop: 2 }}>View details →</div>
+              </Link>
             );
           })}
         </div>

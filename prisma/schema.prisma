@@ -219,13 +219,14 @@ model User {
 // multiple stores. One user can be a TENANT_ADMIN on store A and a
 // CUSTOMER on store B.
 model TenantMembership {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  role      UserRole @default(CUSTOMER) // role WITHIN this tenant
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  role        UserRole @default(CUSTOMER) // role WITHIN this tenant
+  permissions Json?    // { orders: {view,edit,manage}, products: {…}, … }
+  createdAt   DateTime @default(now())
 
   @@unique([userId, tenantId])
   @@index([tenantId])
