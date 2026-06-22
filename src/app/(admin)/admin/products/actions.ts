@@ -22,7 +22,7 @@ interface ProductInput {
 }
 
 /** Parse the common product fields out of submitted form data. */
-function parseProductForm(formData: FormData): ProductInput {
+function parseProductForm(formData: FormData, currency = "gbp"): ProductInput {
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const priceRaw = String(formData.get("price") ?? "").trim();
@@ -74,7 +74,7 @@ function parseProductForm(formData: FormData): ProductInput {
     name: DOMPurify.sanitize(name),
     slug: slugify(name),
     description: description ? DOMPurify.sanitize(description) : null,
-    price: toMinorUnits(Number.parseFloat(priceRaw) || 0),
+    price: toMinorUnits(Number.parseFloat(priceRaw) || 0, currency),
     categoryId: categoryRaw === "none" ? null : categoryRaw,
     images,
     emoji: emoji ? DOMPurify.sanitize(emoji) : null,
@@ -101,7 +101,11 @@ async function validateCategoryOwnership(
 /** Create a new product scoped to the current tenant. */
 export async function createProduct(formData: FormData): Promise<void> {
   const { tenantId } = await getAdminContext();
-  const input = parseProductForm(formData);
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { currency: true },
+  });
+  const input = parseProductForm(formData, tenant?.currency ?? "gbp");
   await validateCategoryOwnership(input.categoryId, tenantId);
 
   try {
@@ -126,7 +130,11 @@ export async function createProduct(formData: FormData): Promise<void> {
 export async function updateProduct(formData: FormData): Promise<void> {
   const { tenantId } = await getAdminContext();
   const id = String(formData.get("id") ?? "");
-  const input = parseProductForm(formData);
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { currency: true },
+  });
+  const input = parseProductForm(formData, tenant?.currency ?? "gbp");
   await validateCategoryOwnership(input.categoryId, tenantId);
 
   try {

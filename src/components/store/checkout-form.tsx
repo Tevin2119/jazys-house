@@ -101,12 +101,18 @@ export function CheckoutForm({ currency }: { currency: string }) {
           placeholder="Address"
           className={fieldClass}
         />
+        <input
+          name="phone"
+          type="tel"
+          placeholder="Phone (optional — required for some carriers)"
+          className={fieldClass}
+        />
         <div className="grid gap-4 sm:grid-cols-3">
           <input name="city" required placeholder="City" className={fieldClass} />
           <input
-            name="postcode"
+            name="postalCode"
             required
-            placeholder="Postcode"
+            placeholder="Postal Code"
             className={fieldClass}
           />
           <input

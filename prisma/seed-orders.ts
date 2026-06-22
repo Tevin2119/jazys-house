@@ -35,7 +35,7 @@ async function main() {
     
     for (let i = 0; i < orderCount; i++) {
       const items = products.slice(0, Math.floor(Math.random() * 3) + 1);
-      const total = items.reduce((s, p) => s + p.price, 0);
+      const total = items.reduce((s: number, p: { price: number }) => s + p.price, 0);
       const statuses = ["DELIVERED", "PROCESSING", "SHIPPED", "PENDING"];
       
       const order = await prisma.order.create({
@@ -47,7 +47,7 @@ async function main() {
           status: statuses[Math.floor(Math.random() * statuses.length)],
           currency: "gbp",
           items: {
-            create: items.map(p => ({
+            create: items.map((p: { id: string; price: number }) => ({
               tenantId: tenant.id,
               productId: p.id,
               quantity: Math.floor(Math.random() * 2) + 1,

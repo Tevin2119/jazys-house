@@ -36,6 +36,11 @@ model Tenant {
   newsletterSignups NewsletterSignup[]
   savedQueries      SavedQuery[]
   wishlistItems     WishlistItem[]
+  orderStatusLogs   OrderStatusLog[]
+  orderMessages     OrderMessage[]
+  shipments         Shipment[]
+  refunds           Refund[]
+  carrierConfigs    TenantCarrier[]
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -100,6 +105,13 @@ model Order {
   name     String?
   address  Json? // shipping address snapshot
 
+  // G-82: contact phone (required by Japanese carriers for label creation)
+  phone         String?
+
+  // G-79: financial breakdown — subtotal + shippingTotal must always sum to total
+  subtotal      Int     @default(0) // minor units — item lines before shipping
+  shippingTotal Int     @default(0) // minor units — shipping charge at time of order
+
   // Stripe integration (Phase 4)
   stripeSessionId String? @unique
   // COUNCIL FIX: webhook idempotency — the Stripe event id that last mutated this
@@ -109,9 +121,20 @@ model Order {
   // so unpaid orders are unaffected.)
   stripeEventId   String? @unique
 
-  items     OrderItem[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  // G-80: payment details — provider, method, and provider-assigned IDs
+  paymentProvider String?   // STRIPE, KOMOJU
+  paymentMethod   String?   // card, paypay, konbini, bank_transfer
+  paymentId       String?   // provider's charge / payment ID
+  paymentStatus   String?   // PENDING, COMPLETED, FAILED, REFUNDED
+  paidAt          DateTime?
+
+  items      OrderItem[]
+  statusLogs OrderStatusLog[]
+  messages   OrderMessage[]
+  shipments  Shipment[]
+  refunds    Refund[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   @@index([tenantId, status])
   @@index([tenantId, createdAt])
@@ -138,9 +161,31 @@ model OrderItem {
 enum OrderStatus {
   PENDING
   PROCESSING
+  LABEL_CREATED
   SHIPPED
+  IN_TRANSIT
   DELIVERED
   CANCELLED
+  REFUNDED
+}
+
+enum MessageSide {
+  CUSTOMER
+  STORE
+}
+
+enum CarrierType {
+  YAMATO
+  SAGAWA
+  JAPAN_POST
+  OTHER
+}
+
+enum RefundStage {
+  REQUESTED
+  APPROVED
+  PROCESSING
+  COMPLETED
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -148,16 +193,16 @@ enum OrderStatus {
 // ─────────────────────────────────────────────────────────────
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
   // bcrypt hash for credentials login (Phase 2). Null for accounts that have not
   // set a password (e.g. seeded customers, future OAuth-only users).
   passwordHash String?
-  role      UserRole @default(CUSTOMER)
-  tenantId  String? // null = super admin (spans all tenants)
-  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
-  createdAt DateTime @default(now())
+  role         UserRole @default(CUSTOMER)
+  tenantId     String? // null = super admin (spans all tenants)
+  tenant       Tenant?  @relation(fields: [tenantId], references: [id])
+  createdAt    DateTime @default(now())
 
   // COUNCIL FIX (JH-004): TenantMembership replaces single tenantId for
   // multi-tenant users. A user can belong to multiple tenants with different
@@ -196,6 +241,125 @@ enum UserRole {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Order Audit Trail
+// ─────────────────────────────────────────────────────────────
+
+model OrderStatusLog {
+  id        String       @id @default(cuid())
+  orderId   String
+  order     Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tenantId  String
+  tenant    Tenant       @relation(fields: [tenantId], references: [id])
+  oldStatus OrderStatus?
+  newStatus OrderStatus
+  changedBy String? // userId of the actor
+  reason    String?
+  createdAt DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([tenantId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Order Messages
+// ─────────────────────────────────────────────────────────────
+
+model OrderMessage {
+  id         String      @id @default(cuid())
+  orderId    String
+  order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+  content    String
+  side       MessageSide
+  senderName String
+  isInternal Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([tenantId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Shipping
+// ─────────────────────────────────────────────────────────────
+
+model Shipment {
+  id             String          @id @default(cuid())
+  orderId        String
+  order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant          @relation(fields: [tenantId], references: [id])
+  carrier        CarrierType
+  trackingNumber String?
+  labelUrl       String?
+  status         String          @default("PENDING")
+  createdAt      DateTime        @default(now())
+  events         ShipmentEvent[]
+
+  @@index([orderId])
+  @@index([tenantId])
+}
+
+model ShipmentEvent {
+  id          String   @id @default(cuid())
+  shipmentId  String
+  shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  status      String
+  location    String?
+  description String?
+  timestamp   DateTime
+
+  @@index([shipmentId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Carrier Config (G-84) — minimum credentials for Ship&co label creation
+// ─────────────────────────────────────────────────────────────
+
+model TenantCarrier {
+  id               String      @id @default(cuid())
+  tenantId         String
+  tenant           Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  carrier          CarrierType
+  apiKey           String? // store encrypted in production; never log
+  originPostalCode String?
+  originAddress    Json? // { line1, city, prefecture, country }
+  enabled          Boolean     @default(false)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@unique([tenantId, carrier])
+  @@index([tenantId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Refunds
+// ─────────────────────────────────────────────────────────────
+
+model Refund {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id])
+  tenantId  String
+  tenant    Tenant      @relation(fields: [tenantId], references: [id])
+  amount    Int // minor units (same currency as order)
+  reason    String?
+  stage     RefundStage @default(REQUESTED)
+  method    String?
+
+  // G-81: provider execution and idempotency
+  providerRefundId  String? // provider-assigned refund ID
+  providerPaymentId String? // original payment ID — idempotency key for re-submission
+  failureReason     String? // populated if provider refund fails
+
+  createdAt DateTime    @default(now())
+
+  @@index([orderId])
+  @@index([tenantId, stage])
+}
+
+// ─────────────────────────────────────────────────────────────
 // Catering
 // ─────────────────────────────────────────────────────────────
 
@@ -206,13 +370,13 @@ model CateringInquiry {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  name     String
-  email    String
-  date     String
-  guests   Int
-  package  String?
-  message  String
-  status   String   @default("new") // new, contacted, booked, declined
+  name      String
+  email     String
+  date      String
+  guests    Int
+  package   String?
+  message   String
+  status    String   @default("new") // new, contacted, booked, declined
   createdAt DateTime @default(now())
 
   @@index([tenantId, status])
@@ -246,8 +410,8 @@ model SavedQuery {
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name      String
-  config    Json     // { model, fields, filters, sort }
-  createdBy String   // User email
+  config    Json // { model, fields, filters, sort }
+  createdBy String // User email
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -105,11 +105,12 @@ export async function placeOrder(
   const email = String(formData.get("email") ?? "").trim();
   const line1 = String(formData.get("address1") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim();
-  const postcode = String(formData.get("postcode") ?? "").trim();
+  const postalCode = String(formData.get("postalCode") ?? "").trim();
   const country = String(formData.get("country") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
   const lines = parseLines(String(formData.get("cart") ?? "[]"));
 
-  if (!name || !email || !line1 || !city || !postcode || !country) {
+  if (!name || !email || !line1 || !city || !postalCode || !country) {
     return { ok: false, error: "Please complete every shipping field." };
   }
   if (!EMAIL_RE.test(email)) {
@@ -125,7 +126,9 @@ export async function placeOrder(
     // Authoritative re-pricing from the DB (throws on missing/oversold lines).
     const verified = await verifyCart(tenant.id, lines);
     items = verified.items;
-    const total = verified.total;
+    const subtotal = verified.total; // item lines before shipping
+    const shippingTotal = 0; // shipping calculated post-checkout for now
+    const total = subtotal + shippingTotal;
 
     const order = await prisma.$transaction(async (tx) => {
       // H2: atomic conditional stock decrement, one line at a time. The
@@ -145,11 +148,20 @@ export async function placeOrder(
         data: {
           tenantId: tenant.id,
           status: "PENDING",
+          subtotal,
+          shippingTotal,
           total,
           currency: tenant.currency,
           name,
           email,
-          address: { line1, city, postcode, country },
+          phone: phone || undefined,
+          address: {
+            line1,
+            city,
+            postalCode,
+            country,
+            ...(phone && { phone }),
+          },
           items: {
             create: items.map((i) => ({
               // C2: every line is scoped to the same tenant as the order.
