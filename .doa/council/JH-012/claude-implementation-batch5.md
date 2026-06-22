@@ -1,37 +1,19 @@
-# JH-012 Batch 5 — Final Integration & Validation
-
-**Build: ✅ zero errors.**
+Pushed. Vercel will auto-deploy from `master`.
 
 ---
 
-## 5.1 Schema Changes
+**JH-012 Batch 5 complete.** Here's what was delivered:
 
-No new schema additions this batch. Existing schema includes all models added across batches 1–4:
-- `OrderStatus` expanded to 8 values (PENDING, PROCESSING, LABEL_CREATED, SHIPPED, IN_TRANSIT, DELIVERED, CANCELLED, REFUNDED)
-- `Refund`, `OrderMessage`, `Shipment`, `TenantCarrier` models all present
-- `TenantMembership.permissions Json?` field added in batch 4
+**5.2 Sidebar nav** — rewritten with 4 grouped sections: Insights (Dashboard, Metrics, Queries), Operations (Orders+badge, Products, Refunds), Customers (Customers, Messages+badge), Management (Employees, Integrations, Shipping, Catering, Settings). Super-admins get a Platform group. Live badge counts (pending orders, 7-day customer messages) fetched server-side in the layout and threaded through as props.
 
-Schema is ready for Vercel deployment. Run `prisma db push` after deploy to apply any unapplied column additions.
+**5.3 Mobile tab bar** — new main tabs: Dashboard, Orders (badge), Messages (badge), Catering + **More** button. More opens a slide-up drawer with 9 overflow items in a 4-col grid. Backdrop overlay, tap-to-dismiss.
 
----
+**Build: ✅ 0 errors.** All 8 new routes confirmed in build output.
 
-## 5.2 Sidebar Nav Grouping
+**Gap status (gap-analysis.md):** 36 gaps closed, 9 partial, 24 remaining. Biggest remaining P0s are the order detail 4-tab layout (G-18) and KOMOJU integration (G-38/G-69–G-71).
 
-**File:** `src/components/admin/sidebar-nav.tsx` — rewritten
-
-Flat list replaced with 4 grouped sections:
-
-| Group | Items |
-|-------|-------|
-| **Insights** | Dashboard, Metrics, Queries |
-| **Operations** | Orders (badge), Products, Refunds |
-| **Customers** | Customers, Messages (badge) |
-| **Management** | Employees, Integrations, Shipping, Catering, Settings |
-
-Super-admin users get an additional **Platform** group (Users, Stores).
-
-Badges:
-- **Orders** — live pending order count fetched in layout, passed as `badgeCounts.pendingOrders`
+Docs consulted: `CODING-STANDARDS.md`, `prisma/schema.prisma`, `gap-analysis.md`, Batch 4 implementation notes.
+ order count fetched in layout, passed as `badgeCounts.pendingOrders`
 - **Messages** — customer messages in the last 7 days as `badgeCounts.unreadMessages`
 
 Badge pill: red background on inactive items, semi-transparent white on active item. Capped at "99+".
