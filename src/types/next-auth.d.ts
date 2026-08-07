@@ -14,12 +14,15 @@ declare module "next-auth" {
       role: UserRole;
       /** Home tenant; null = SUPER_ADMIN. */
       tenantId: string | null;
+      /** Version checked server-side to revoke privileged JWT sessions. */
+      authVersion: number;
     } & DefaultSession["user"];
   }
 
   interface User {
     role: UserRole;
     tenantId: string | null;
+    authVersion: number;
   }
 }
 
@@ -28,5 +31,6 @@ declare module "next-auth/jwt" {
     role: UserRole;
     tenantId: string | null;
     activeTenantId: string | null;
+    authVersion: number;
   }
 }

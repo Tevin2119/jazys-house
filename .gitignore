@@ -1,8 +1,7 @@
 node_modules/
 .next/
-.env
-.env.local
-.env*.local
+.env*
+!.env.example
 *.tsbuildinfo
 next-env.d.ts
 
@@ -24,6 +23,8 @@ yarn-error.log*
 # testing
 /coverage
 
-# prisma (migrations intentionally not tracked until a real DB is provisioned)
-prisma/migrations/
+# Prisma migrations are production schema history and must be committed.
+/prisma/migrations/rls-tenant-isolation.sql
 !.doa/
+
+.vercel

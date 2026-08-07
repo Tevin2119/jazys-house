@@ -9,15 +9,15 @@ import { createProduct } from "../actions";
 
 export default async function NewProductPage(): Promise<ReactElement> {
   const { tenantId } = await getAdminContext();
-  const categories = await prisma.category.findMany({
-    where: { tenantId },
-    orderBy: { name: "asc" },
-  });
+  const [categories, tenant] = await Promise.all([
+    prisma.category.findMany({ where: { tenantId }, orderBy: { name: "asc" } }),
+    prisma.tenant.findUniqueOrThrow({ where: { id: tenantId }, select: { currency: true } }),
+  ]);
 
   return (
     <div>
       <PageHeader title="New product" />
-      <ProductForm action={createProduct} categories={categories} />
+      <ProductForm action={createProduct} categories={categories} currency={tenant.currency} />
     </div>
   );
 }

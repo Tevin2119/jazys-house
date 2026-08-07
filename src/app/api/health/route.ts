@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 
-export async function GET() {
-  return NextResponse.json({ status: "ok", uptime: process.uptime() }, { status: 200 });
+export const dynamic = "force-dynamic";
+
+export async function GET(): Promise<NextResponse> {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return NextResponse.json({ status: "ok" }, { status: 200 });
+  } catch {
+    return NextResponse.json({ status: "error" }, { status: 503 });
+  }
 }

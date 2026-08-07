@@ -16,13 +16,13 @@ function isOrderStatus(value: string): value is OrderStatus {
  * Tenant scope is re-derived server-side — never trusted from form input.
  */
 export async function updateOrderStatus(formData: FormData): Promise<void> {
-  const { tenantId } = await getAdminContext();
+  const { tenantId, session } = await getAdminContext();
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
 
   const order = await prisma.order.findFirst({
     where: { id, tenantId },
-    select: { status: true, stripeEventId: true },
+    select: { status: true, paymentStatus: true },
   });
   if (!order) throw new Error("Order not found.");
 
@@ -33,7 +33,7 @@ export async function updateOrderStatus(formData: FormData): Promise<void> {
   // Stripe-state gate (Phase 4d): an unpaid order may only be CANCELLED, never
   // advanced into fulfilment. Payment confirmation arrives via the Stripe webhook
   // (PENDING → PROCESSING); admins cannot hand-promote an unpaid order.
-  const isPaid = order.stripeEventId !== null;
+  const isPaid = order.paymentStatus === "COMPLETED";
   if (order.status === "PENDING" && status === "PROCESSING" && !isPaid) {
     throw new Error("Payment not yet confirmed — cannot start fulfilment.");
   }
@@ -42,9 +42,12 @@ export async function updateOrderStatus(formData: FormData): Promise<void> {
   // guard makes the transition atomic — if another admin (or the Stripe webhook)
   // changed the status between our read and this write, `count` is 0 and we
   // surface a conflict instead of silently clobbering their change.
-  const res = await prisma.order.updateMany({
-    where: { id, tenantId, status: order.status },
-    data: { status },
+  const res = await prisma.$transaction(async (tx) => {
+    const updated = await tx.order.updateMany({ where: { id, tenantId, status: order.status }, data: { status } });
+    if (updated.count === 1) {
+      await tx.orderStatusLog.create({ data: { orderId: id, tenantId, oldStatus: order.status, newStatus: status, changedBy: session.user.id, reason: "Admin status update" } });
+    }
+    return updated;
   });
 
   if (res.count !== 1) {

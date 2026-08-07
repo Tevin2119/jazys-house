@@ -19,7 +19,6 @@ type RefundData = {
 const STAGE_NEXT: Record<string, string> = {
   REQUESTED:  "Approve",
   APPROVED:   "Start Processing",
-  PROCESSING: "Mark Completed",
 };
 
 const STAGE_LABELS: Record<string, string> = {
@@ -32,9 +31,8 @@ const STAGE_LABELS: Record<string, string> = {
 function fmtCurrency(amount: number, currency: string): string {
   return new Intl.NumberFormat("ja-JP", {
     style:    "currency",
-    currency: currency.toUpperCase(),
-    maximumFractionDigits: 0,
-  }).format(currency.toLowerCase() === "jpy" ? amount : amount / 100);
+      currency: currency.toUpperCase(),
+  }).format(amount / (currency.toLowerCase() === "jpy" || currency.toLowerCase() === "xof" ? 1 : 100));
 }
 
 export function RefundReviewPanel({ refund }: { refund: RefundData }) {

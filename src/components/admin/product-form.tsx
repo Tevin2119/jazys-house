@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SubmitButton } from "@/components/admin/submit-button";
+import { currencyDivisor } from "@/lib/utils";
 
 interface ProductFormProduct {
   id: string;
@@ -31,10 +32,12 @@ interface ProductFormProduct {
 export function ProductForm({
   action,
   categories,
+  currency,
   product = null,
 }: {
   action: (fd: FormData) => void;
   categories: { id: string; name: string }[];
+  currency: string;
   product?: ProductFormProduct | null;
 }) {
   const [categoryId, setCategoryId] = useState(product?.categoryId ?? "none");
@@ -69,15 +72,15 @@ export function ProductForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="price">Price (GBP)</Label>
+        <Label htmlFor="price">Price ({currency.toUpperCase()})</Label>
         <Input
           id="price"
           name="price"
           type="number"
-          step="0.01"
+          step={currencyDivisor(currency) === 1 ? "1" : "0.01"}
           min="0"
           required
-          defaultValue={product ? product.price / 100 : ""}
+          defaultValue={product ? product.price / currencyDivisor(currency) : ""}
         />
       </div>
 

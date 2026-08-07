@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Offline — Jazy's House",
@@ -16,12 +17,12 @@ export default function OfflinePage() {
         We couldn&apos;t reach Jazy&apos;s House. Check your connection and try
         again — recently viewed pages may still be available.
       </p>
-      <a
+      <Link
         href="/"
         className="rounded-md bg-[var(--tenant-primary,#c0563d)] px-5 py-2.5 text-sm font-medium text-white"
       >
         Retry
-      </a>
+      </Link>
     </main>
   );
 }

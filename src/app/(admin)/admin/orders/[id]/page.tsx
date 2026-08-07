@@ -30,7 +30,7 @@ export default async function OrderDetailPage({
   });
   if (!order) notFound();
 
-  const isPaid      = order.stripeEventId !== null;
+  const isPaid      = order.paymentStatus === "COMPLETED" || order.paymentStatus === "REFUNDED";
   const hasSession  = order.stripeSessionId !== null;
 
   const nextOptions = allowedNextStatuses(order.status).filter((next) =>

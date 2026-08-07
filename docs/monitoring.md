@@ -1,61 +1,29 @@
-# Monitoring Setup — Jazy's House Platform
+# Monitoring and Alerting
 
-**COUNCIL FIX (JH-004):** Free tier has no built-in alerting. UptimeRobot fills the gap at £0.
+## Required monitors
 
----
+Configure monitors against the production root domain, with alerts sent to a role-based operations mailbox:
 
-## UptimeRobot Free (50 monitors, 5-min interval)
+| Target | Purpose | Expected response |
+| --- | --- | --- |
+| `/` | storefront liveness | 200 |
+| `/shop` | tenant/database-backed page | 200 and expected store name |
+| `/login` | authentication surface | 200 |
+| `/api/health` | database readiness | `{"status":"ok"}` and 200 |
 
-### Required Monitors
+`/api/health` performs a bounded `SELECT 1`. A 503 means the application cannot reach PostgreSQL.
 
-| # | Type | Target | Checks |
-|---|------|--------|--------|
-| 1 | HTTP(s) | `https://<root-domain>/` | Storefront is up, returns 200 |
-| 2 | Keyword | `https://<root-domain>/shop` | Page contains "Jazy's House" (confirms DB is serving data) |
-| 3 | HTTP(s) | `https://<root-domain>/login` | Auth is up |
-| 4 | HTTP(s) | `https://<root-domain>/api/health` | Health route (see below) |
+## Payment monitoring
 
-### Health Route
+1. Configure Stripe webhook delivery alerts for `/api/webhooks/stripe`.
+2. Alert on every webhook endpoint failure and investigate retries before they expire.
+3. Review completed payments against `PROCESSING` orders daily during launch.
+4. Monitor Vercel 5xx errors, function duration, and database connection errors.
 
-Add a lightweight health endpoint that does a minimal Prisma query:
+## Error tracking
 
-```ts
-// src/app/api/health/route.ts
-import { prisma } from "@/lib/db";
-import { NextResponse } from "next/server";
+Install and configure an error-monitoring service before live payments. It must redact request bodies, authorization headers, Stripe payloads, carrier credentials, and customer addresses. Alerts need a named owner and an acknowledgement target.
 
-export async function GET() {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return NextResponse.json({ status: "ok" }, { status: 200 });
-  } catch {
-    return NextResponse.json({ status: "error" }, { status: 503 });
-  }
-}
-```
+## Alert drill
 
-This confirms the DB connection is alive — a static page can be up while the DB is down.
-
-### Alert Contacts
-- Email: faye.dienaba@yahoo.com
-- Integration: Telegram / Discord bot (UptimeRobot supports both free)
-
----
-
-## Vercel Web Analytics (Hobby tier — 50K events/mo)
-
-Enable in Vercel dashboard. Good for traffic trends, page views, and geography. NOT for downtime alerts — it's analytics, not monitoring.
-
----
-
-## Stripe Dashboard
-
-- Monitor webhook delivery status at https://dashboard.stripe.com/webhooks
-- Check for failed deliveries after first live payments
-- Stripe emails on webhook endpoint failures (configure in Stripe Dashboard)
-
----
-
-## Future: Sentry (free tier — 5K errors/mo)
-
-Add `@sentry/nextjs` when error tracking becomes important. Not needed at launch.
+Test every alert destination after configuration and quarterly thereafter. Record the date, recipient, and result in the operations log.

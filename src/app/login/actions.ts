@@ -3,6 +3,7 @@
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
 import { prisma } from "@/lib/db";
+import { assertRateLimit } from "@/lib/rate-limit";
 
 /**
  * Credentials sign-in server action. Checks the user's role before calling
@@ -13,6 +14,7 @@ export async function authenticate(
   _prevState: string | undefined,
   formData: FormData,
 ): Promise<string | undefined> {
+  await assertRateLimit("login", 8, 15 * 60_000);
   const email =
     typeof formData.get("email") === "string"
       ? (formData.get("email") as string).trim().toLowerCase()
@@ -26,7 +28,7 @@ export async function authenticate(
       where: { email },
       select: { role: true },
     });
-    if (user?.role === "SUPER_ADMIN" || user?.role === "TENANT_ADMIN") {
+    if (user && ["SUPER_ADMIN", "TENANT_ADMIN", "OWNER", "ADMIN"].includes(user.role)) {
       redirectTo = "/admin";
     }
   }

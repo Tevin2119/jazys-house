@@ -23,7 +23,7 @@ function label(status: OrderStatus): string {
  */
 export function OrderStatusChanger({
   id,
-  current: _current,
+  current,
   nextOptions,
 }: {
   id: string;
@@ -52,7 +52,7 @@ export function OrderStatusChanger({
   return (
     <Select onValueChange={onChange} disabled={isPending}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Change status…" />
+        <SelectValue placeholder={`Change from ${label(current)}…`} />
       </SelectTrigger>
       <SelectContent>
         {nextOptions.map((s) => (

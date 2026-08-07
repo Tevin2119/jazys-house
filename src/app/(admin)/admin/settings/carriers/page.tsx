@@ -91,11 +91,10 @@ export default async function CarriersSettingsPage(): Promise<React.ReactElement
                     <input
                       type="password"
                       name="apiKey"
-                      defaultValue={config?.apiKey ?? ""}
                       placeholder="••••••••"
                       style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #ece2d2", background: "#fff", fontSize: 14, fontFamily: "monospace", boxSizing: "border-box" }}
                     />
-                    <div style={{ fontSize: 11, color: "#a39685", marginTop: 4 }}>Stored encrypted. Leave blank to keep existing.</div>
+                    <div style={{ fontSize: 11, color: "#a39685", marginTop: 4 }}>{config?.apiKeyEncrypted ? "Credential saved securely. " : "No credential saved. "}Leave blank to keep the existing value.</div>
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#6b5d4f", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>

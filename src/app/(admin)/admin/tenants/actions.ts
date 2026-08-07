@@ -8,18 +8,16 @@ import { requireSuperAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { assertValidTheme } from "@/lib/theme";
 import { DEFAULT_CATEGORIES } from "@/lib/tenant-defaults";
-import { slugify } from "@/lib/utils";
+import { isSupportedCurrency, slugify } from "@/lib/utils";
 
 export interface TenantActionState {
   error?: string;
 }
 
-const CURRENCY = /^[a-z]{3}$/;
-
 function parseCurrency(raw: FormDataEntryValue | null): string {
   const c = String(raw ?? "").trim().toLowerCase() || "gbp";
-  if (!CURRENCY.test(c)) {
-    throw new Error("Currency must be a 3-letter ISO code (e.g. gbp, usd).");
+  if (!isSupportedCurrency(c)) {
+    throw new Error("Currency must be one of GBP, JPY, USD, EUR, or XOF.");
   }
   return c;
 }
@@ -71,8 +69,8 @@ export async function createTenant(
     if (!adminEmail || !adminEmail.includes("@")) {
       return { error: "A valid owner email is required." };
     }
-    if (adminPassword.length < 8) {
-      return { error: "Owner password must be at least 8 characters." };
+    if (adminPassword.length < 16) {
+      return { error: "Owner password must be at least 16 characters." };
     }
 
     const passwordHash = await bcrypt.hash(adminPassword, 10);
@@ -90,7 +88,7 @@ export async function createTenant(
         })),
       });
 
-      await tx.user.create({
+      const owner = await tx.user.create({
         data: {
           email: adminEmail,
           name: `${name} Owner`,
@@ -99,6 +97,7 @@ export async function createTenant(
           passwordHash,
         },
       });
+      await tx.tenantMembership.create({ data: { userId: owner.id, tenantId: tenant.id, role: "OWNER" } });
     });
   } catch (error) {
     if (isP2002(error)) {
@@ -141,6 +140,11 @@ export async function updateTenant(
       logoUrl: formData.get("logoUrl"),
     });
 
+    const existing = await prisma.tenant.findUniqueOrThrow({ where: { id }, select: { currency: true } });
+    if (currency !== existing.currency) {
+      const records = await prisma.product.count({ where: { tenantId: id } }) + await prisma.order.count({ where: { tenantId: id } });
+      if (records > 0) return { error: "Currency cannot change after products or orders exist." };
+    }
     await prisma.tenant.update({
       where: { id },
       data: { name, domain, currency, theme: theme as unknown as Prisma.InputJsonValue },

@@ -3,210 +3,152 @@
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
 import { getCurrentTenant } from "@/lib/tenant";
+import { assertRateLimit } from "@/lib/rate-limit";
 import { stripe, verifyCart, type CartLine, type VerifiedLine } from "@/lib/stripe";
 
 export interface CheckoutState {
   ok: boolean;
   error?: string;
-  /** Stripe Checkout URL (card payments). */
   url?: string;
-  /** Order ID returned for non-Stripe payment methods. */
-  orderId?: string;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_TEXT_LENGTH = 200;
 
 function parseLines(raw: string): CartLine[] {
   let parsed: unknown;
   try { parsed = JSON.parse(raw); } catch { return []; }
-  if (!Array.isArray(parsed)) return [];
-  const lines: CartLine[] = [];
-  for (const entry of parsed) {
-    if (!entry || typeof entry !== "object") continue;
-    const productId = (entry as Record<string, unknown>).productId;
-    const quantity = (entry as Record<string, unknown>).quantity;
-    if (typeof productId === "string" && Number.isInteger(quantity)) {
-      lines.push({ productId, quantity: quantity as number });
-    }
-  }
-  return lines;
+  if (!Array.isArray(parsed) || parsed.length > 50) return [];
+  return parsed.flatMap((entry) => {
+    if (!entry || typeof entry !== "object") return [];
+    const { productId, quantity } = entry as Record<string, unknown>;
+    return typeof productId === "string" && productId.length <= 64 && Number.isSafeInteger(quantity)
+      ? [{ productId, quantity: quantity as number }]
+      : [];
+  });
 }
 
-async function requestOrigin(): Promise<string> {
+async function requestOrigin(tenantDomain: string | null): Promise<string> {
   const h = await headers();
-  const host = h.get("x-tenant-host") ?? h.get("host");
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  if (host) return `${proto}://${host}`;
+  const host = h.get("x-tenant-host")?.toLowerCase().replace(/:\d+$/, "");
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN?.toLowerCase().replace(/:\d+$/, "");
+  const trusted = host && (host === tenantDomain?.toLowerCase() || host === rootDomain || Boolean(rootDomain && host.endsWith(`.${rootDomain}`)));
+  if (trusted) return `${process.env.NODE_ENV === "production" ? "https" : "http"}://${h.get("x-tenant-host")}`;
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
-async function cancelAndRestock(
-  tenantId: string,
-  orderId: string,
-  items: VerifiedLine[],
-): Promise<void> {
+async function cancelAndRestock(tenantId: string, orderId: string, items: VerifiedLine[]): Promise<void> {
   try {
     await prisma.$transaction(async (tx) => {
-      for (const i of items) {
+      const cancelled = await tx.order.updateMany({
+        where: { id: orderId, tenantId, status: "PENDING" },
+        data: { status: "CANCELLED", paymentStatus: "FAILED" },
+      });
+      if (cancelled.count !== 1) return;
+      for (const item of items) {
         await tx.product.updateMany({
-          where: { id: i.productId, tenantId },
-          data: { stock: { increment: i.quantity } },
+          where: { id: item.productId, tenantId },
+          data: { stock: { increment: item.quantity } },
         });
       }
-      await tx.order.updateMany({
-        where: { id: orderId, tenantId, status: "PENDING" },
-        data: { status: "CANCELLED" },
-      });
     });
-  } catch (err) {
-    console.error("[checkout] failed to restock cancelled order", orderId, err);
+  } catch (error) {
+    console.error("[checkout] failed to compensate order", orderId, error);
   }
 }
 
-/**
- * Place an order with Japanese address fields and payment method selection.
- *
- * Card payments → Stripe Checkout (returns url).
- * Non-card payments → order created in PENDING state, returns orderId for
- *   confirmation page. Actual KOMOJU integration wired in a later task (G-69–71).
- */
-export async function placeOrder(
-  _prev: CheckoutState,
-  formData: FormData,
-): Promise<CheckoutState> {
+export async function placeOrder(_prev: CheckoutState, formData: FormData): Promise<CheckoutState> {
+  await assertRateLimit("checkout", 5, 10 * 60_000);
   const tenant = await getCurrentTenant();
   if (!tenant) return { ok: false, error: "ストアが見つかりません。" };
 
-  // Name
-  const lastName  = String(formData.get("lastName")  ?? "").trim();
-  const firstName = String(formData.get("firstName") ?? "").trim();
-  const lastNameKana  = String(formData.get("lastNameKana")  ?? "").trim();
-  const firstNameKana = String(formData.get("firstNameKana") ?? "").trim();
-  const name = [lastName, firstName].filter(Boolean).join(" ");
+  const value = (name: string) => String(formData.get(name) ?? "").trim();
+  const lastName = value("lastName");
+  const firstName = value("firstName");
+  const email = value("email").toLowerCase();
+  const phone = value("phone");
+  const postalCode = value("postalCode").replace(/[^0-9]/g, "");
+  const prefecture = value("prefecture");
+  const city = value("city");
+  const addressLine1 = value("addressLine1");
+  const addressLine2 = value("addressLine2");
+  const paymentMethod = value("paymentMethod");
+  const checkoutAttemptId = value("checkoutAttemptId");
+  const lines = parseLines(value("cart"));
 
-  // Contact
-  const email = String(formData.get("email") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
+  if (paymentMethod !== "card") return { ok: false, error: "この決済方法は現在利用できません。" };
+  if (!/^[0-9a-f-]{36}$/i.test(checkoutAttemptId)) return { ok: false, error: "チェックアウトを最初からやり直してください。" };
+  if (!lastName || !firstName || !EMAIL_RE.test(email) || !phone || postalCode.length !== 7 || !prefecture || !city || !addressLine1 || !lines.length) {
+    return { ok: false, error: "入力内容を確認してください。" };
+  }
+  if ([lastName, firstName, phone, prefecture, city, addressLine1, addressLine2].some((text) => text.length > MAX_TEXT_LENGTH)) {
+    return { ok: false, error: "入力内容が長すぎます。" };
+  }
 
-  // Address
-  const postalCode   = String(formData.get("postalCode")   ?? "").trim().replace(/[^0-9]/g, "");
-  const prefecture   = String(formData.get("prefecture")   ?? "").trim();
-  const city         = String(formData.get("city")         ?? "").trim();
-  const addressLine1 = String(formData.get("addressLine1") ?? "").trim();
-  const addressLine2 = String(formData.get("addressLine2") ?? "").trim();
+  const verified = await verifyCart(tenant.id, lines);
+  let items = verified.items;
+  let total = verified.total;
+  const existing = await prisma.order.findUnique({
+    where: { checkoutAttemptId },
+    include: { items: { include: { product: { select: { name: true } } } } },
+  });
+  if (existing) {
+    if (existing.tenantId !== tenant.id || existing.email !== email || existing.status === "CANCELLED") {
+      return { ok: false, error: "このチェックアウトは再利用できません。ページを更新してやり直してください。" };
+    }
+    if (existing.stripeSessionId) {
+      const session = await stripe.checkout.sessions.retrieve(existing.stripeSessionId);
+      if (session.url) return { ok: true, url: session.url };
+    }
+    // A retry must charge the exact immutable order snapshot, not a cart that
+    // changed after the original reservation was created.
+    items = existing.items.map((item) => ({ productId: item.productId, name: item.product.name, unitPrice: item.price, quantity: item.quantity }));
+    total = existing.total;
+  }
 
-  const paymentMethod = String(formData.get("paymentMethod") ?? "card").trim();
-  const lines = parseLines(String(formData.get("cart") ?? "[]"));
-
-  // Validation
-  if (!lastName || !firstName)
-    return { ok: false, error: "お名前（姓・名）を入力してください。" };
-  if (!EMAIL_RE.test(email))
-    return { ok: false, error: "有効なメールアドレスを入力してください。" };
-  if (!phone)
-    return { ok: false, error: "電話番号を入力してください。" };
-  if (!postalCode || !prefecture || !city || !addressLine1)
-    return { ok: false, error: "住所を完全に入力してください（郵便番号・都道府県・市区町村・番地）。" };
-  if (lines.length === 0)
-    return { ok: false, error: "カートが空です。" };
-
-  const address = {
-    postalCode,
-    prefecture,
-    city,
-    line1: addressLine1,
-    ...(addressLine2 && { line2: addressLine2 }),
-    ...(lastNameKana  && { lastNameKana }),
-    ...(firstNameKana && { firstNameKana }),
-    country: "JP",
-  };
-
-  let orderId: string;
-  let items: VerifiedLine[];
-  try {
-    const verified = await verifyCart(tenant.id, lines);
-    items = verified.items;
-    const subtotal = verified.total;
-    const shippingTotal = 0;
-    const total = subtotal + shippingTotal;
-
-    const order = await prisma.$transaction(async (tx) => {
-      for (const i of items) {
-        const res = await tx.product.updateMany({
-          where: { id: i.productId, tenantId: tenant.id, stock: { gte: i.quantity } },
-          data: { stock: { decrement: i.quantity } },
-        });
-        if (res.count !== 1) throw new Error(`「${i.name}」の在庫が不足しています`);
-      }
-      return tx.order.create({
-        data: {
-          tenantId: tenant.id,
-          status: "PENDING",
-          subtotal,
-          shippingTotal,
-          total,
-          currency: tenant.currency,
-          name,
-          email,
-          phone: phone || undefined,
-          address,
-          paymentProvider: paymentMethod === "card" ? "STRIPE" : "KOMOJU",
-          paymentMethod,
-          items: {
-            create: items.map((i) => ({
-              tenantId: tenant.id,
-              productId: i.productId,
-              quantity: i.quantity,
-              price: i.unitPrice,
-            })),
+  let orderId = existing?.id;
+  if (!orderId) {
+    try {
+      const order = await prisma.$transaction(async (tx) => {
+        for (const item of items) {
+          const updated = await tx.product.updateMany({
+            where: { id: item.productId, tenantId: tenant.id, stock: { gte: item.quantity } },
+            data: { stock: { decrement: item.quantity } },
+          });
+          if (updated.count !== 1) throw new Error(`「${item.name}」の在庫が不足しています`);
+        }
+        return tx.order.create({
+          data: {
+            tenantId: tenant.id, checkoutAttemptId, status: "PENDING", paymentProvider: "STRIPE", paymentMethod: "card", paymentStatus: "PENDING",
+            subtotal: total, shippingTotal: 0, total, currency: tenant.currency, name: `${lastName} ${firstName}`, email, phone,
+            address: { postalCode, prefecture, city, line1: addressLine1, ...(addressLine2 ? { line2: addressLine2 } : {}), country: "JP" },
+            items: { create: items.map((item) => ({ tenantId: tenant.id, productId: item.productId, quantity: item.quantity, price: item.unitPrice })) },
           },
-        },
+        });
       });
-    });
-    orderId = order.id;
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "注文の処理に失敗しました。";
-    return { ok: false, error: message };
+      orderId = order.id;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "注文の処理に失敗しました。";
+      return { ok: false, error: message };
+    }
   }
 
-  // Non-card payments: order is placed in PENDING; return orderId for client redirect.
-  // KOMOJU session creation will be wired in a later task.
-  if (paymentMethod !== "card") {
-    return { ok: true, orderId };
-  }
-
-  // Card → Stripe Checkout
-  const origin = await requestOrigin();
+  const origin = await requestOrigin(tenant.domain);
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      payment_method_types: ["card"],
       customer_email: email,
-      line_items: items.map((i) => ({
-        quantity: i.quantity,
-        price_data: {
-          currency: tenant.currency,
-          unit_amount: i.unitPrice,
-          product_data: { name: i.name },
-        },
-      })),
+      line_items: items.map((item) => ({ quantity: item.quantity, price_data: { currency: tenant.currency, unit_amount: item.unitPrice, product_data: { name: item.name } } })),
       success_url: `${origin}/checkout/confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/cart`,
       metadata: { orderId, tenantId: tenant.id },
-    });
-
-    if (!session.url) {
-      await cancelAndRestock(tenant.id, orderId, items);
-      return { ok: false, error: "決済を開始できませんでした。もう一度お試しください。" };
-    }
-
-    await prisma.order.updateMany({
-      where: { id: orderId, tenantId: tenant.id },
-      data: { stripeSessionId: session.id },
-    });
-
+    }, { idempotencyKey: `checkout:${orderId}` });
+    if (!session.url) throw new Error("Stripe did not return a Checkout URL.");
+    await prisma.order.updateMany({ where: { id: orderId, tenantId: tenant.id, stripeSessionId: null }, data: { stripeSessionId: session.id } });
     return { ok: true, url: session.url };
-  } catch (err) {
-    console.error("[checkout] stripe session creation failed", err);
+  } catch (error) {
+    console.error("[checkout] Stripe session creation failed", error);
     await cancelAndRestock(tenant.id, orderId, items);
     return { ok: false, error: "決済を開始できませんでした。もう一度お試しください。" };
   }

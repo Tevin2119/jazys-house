@@ -6,8 +6,20 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-// Currencies that have no subunit — stored and displayed as whole units.
-const ZERO_DECIMAL_CURRENCIES = new Set(["jpy", "krw", "vnd"]);
+/** Currencies currently supported by the storefront and Stripe Checkout. */
+export const SUPPORTED_CURRENCIES = ["gbp", "jpy", "usd", "eur", "xof"] as const;
+
+// Stripe currencies without a minor unit. Keep all money parsing and formatting
+// on this single list so an admin form cannot disagree with Checkout.
+const ZERO_DECIMAL_CURRENCIES = new Set(["jpy", "krw", "vnd", "xof", "xaf", "xpf"]);
+
+export function isSupportedCurrency(value: string): value is (typeof SUPPORTED_CURRENCIES)[number] {
+  return SUPPORTED_CURRENCIES.includes(value.toLowerCase() as (typeof SUPPORTED_CURRENCIES)[number]);
+}
+
+export function currencyDivisor(currency = "gbp"): number {
+  return ZERO_DECIMAL_CURRENCIES.has(currency.toLowerCase()) ? 1 : 100;
+}
 
 /**
  * Format an integer amount of minor units as a localized currency string.
@@ -20,7 +32,7 @@ export function formatPrice(
   currency = "gbp",
   locale = "en-GB",
 ): string {
-  const divisor = ZERO_DECIMAL_CURRENCIES.has(currency.toLowerCase()) ? 1 : 100;
+  const divisor = currencyDivisor(currency);
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currency.toUpperCase(),
@@ -32,10 +44,7 @@ export function formatPrice(
  * Zero-decimal currencies (JPY, KRW, VND) are already whole units.
  */
 export function toMinorUnits(majorUnits: number, currency = "gbp"): number {
-  if (ZERO_DECIMAL_CURRENCIES.has(currency.toLowerCase())) {
-    return Math.round(majorUnits);
-  }
-  return Math.round(majorUnits * 100);
+  return Math.round(majorUnits * currencyDivisor(currency));
 }
 
 /** URL-safe slug from arbitrary text. */

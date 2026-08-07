@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import type { OrderStatus, Prisma } from "@prisma/client";
 import { getAdminContext } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { formatPrice } from "@/lib/utils";
 import { ORDER_STATUSES } from "@/lib/order-status";
 import { SearchInput, StatusPillFilter } from "@/components/admin/filters";
 import { OrdersDateFilter } from "@/components/admin/orders-date-filter";
@@ -101,7 +100,7 @@ export default async function OrdersPage({
       </div>
 
       {/* Table (client for bulk selection) */}
-      <OrdersTableClient orders={rows} currency={rows[0]?.currency ?? "gbp"} />
+      <OrdersTableClient orders={rows} />
     </div>
   );
 }

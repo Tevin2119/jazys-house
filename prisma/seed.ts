@@ -203,14 +203,9 @@ async function seedTenant(def: TenantSeed, passwordHash: string): Promise<void> 
   }
 
   // First TENANT_ADMIN owner for this store.
-  await prisma.user.upsert({
+  const owner = await prisma.user.upsert({
     where: { email: def.owner.email },
-    update: {
-      name: def.owner.name,
-      role: "TENANT_ADMIN",
-      tenantId: tenant.id,
-      passwordHash,
-    },
+    update: { name: def.owner.name, role: "TENANT_ADMIN", tenantId: tenant.id },
     create: {
       email: def.owner.email,
       name: def.owner.name,
@@ -219,6 +214,11 @@ async function seedTenant(def: TenantSeed, passwordHash: string): Promise<void> 
       passwordHash,
     },
   });
+  await prisma.tenantMembership.upsert({
+    where: { userId_tenantId: { userId: owner.id, tenantId: tenant.id } },
+    update: { role: "OWNER" },
+    create: { userId: owner.id, tenantId: tenant.id, role: "OWNER" },
+  });
 
   console.log(
     `  ✓ ${def.categorySlugs.length} categories, ${def.products.length} products, owner ${def.owner.email}`,
@@ -226,9 +226,13 @@ async function seedTenant(def: TenantSeed, passwordHash: string): Promise<void> 
 }
 
 async function main() {
-  // The password comes from env so a real secret never lives in source; a dev
-  // default keeps `db:seed` usable.
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "admin1234";
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_PRODUCTION_SEED !== "true") {
+    throw new Error("Refusing to seed production. Set ALLOW_PRODUCTION_SEED=true only for a deliberate bootstrap.");
+  }
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (!adminPassword || adminPassword.length < 16) {
+    throw new Error("SEED_ADMIN_PASSWORD must be explicitly set and at least 16 characters long.");
+  }
   const passwordHash = await bcrypt.hash(adminPassword, 10);
 
   for (const def of TENANTS) {
@@ -238,12 +242,7 @@ async function main() {
   // Platform super admin — spans all tenants (tenantId: null).
   await prisma.user.upsert({
     where: { email: "admin@jazyshouse.com" },
-    update: {
-      name: "Tevin (Platform Admin)",
-      role: "SUPER_ADMIN",
-      tenantId: null,
-      passwordHash,
-    },
+    update: { name: "Tevin (Platform Admin)", role: "SUPER_ADMIN", tenantId: null },
     create: {
       email: "admin@jazyshouse.com",
       name: "Tevin (Platform Admin)",

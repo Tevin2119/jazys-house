@@ -8,7 +8,8 @@ import { prisma } from "@/lib/db";
 const ASSIGNABLE_ROLES: UserRole[] = ["OWNER", "ADMIN", "EMPLOYEE"];
 
 export async function updateMembershipRole(membershipId: string, role: UserRole): Promise<void> {
-  const { tenantId } = await getAdminContext();
+  const { tenantId, role: actorRole } = await getAdminContext();
+  if (actorRole !== "SUPER_ADMIN" && actorRole !== "OWNER" && actorRole !== "TENANT_ADMIN") throw new Error("Only owners may manage staff.");
   if (!ASSIGNABLE_ROLES.includes(role)) throw new Error("Invalid role.");
 
   await prisma.tenantMembership.updateMany({
@@ -24,7 +25,8 @@ export async function updateMembershipPermissions(
   membershipId: string,
   permissions: Record<string, Record<string, boolean>>,
 ): Promise<void> {
-  const { tenantId } = await getAdminContext();
+  const { tenantId, role: actorRole } = await getAdminContext();
+  if (actorRole !== "SUPER_ADMIN" && actorRole !== "OWNER" && actorRole !== "TENANT_ADMIN") throw new Error("Only owners may manage staff.");
 
   await prisma.tenantMembership.updateMany({
     where: { id: membershipId, tenantId },

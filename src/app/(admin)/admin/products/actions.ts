@@ -70,16 +70,24 @@ function parseProductForm(formData: FormData, currency = "gbp"): ProductInput {
 
   const parsedStock = Number.parseInt(stockRaw, 10);
 
+  const parsedPrice = Number.parseFloat(priceRaw);
+  if (!name || name.length > 160 || !Number.isFinite(parsedPrice) || parsedPrice < 0 || parsedPrice > 20_000_000) {
+    throw new Error("Enter a valid product name and non-negative price.");
+  }
+  if (!Number.isInteger(parsedStock) || parsedStock < 0 || parsedStock > 10_000_000) {
+    throw new Error("Enter a valid non-negative stock quantity.");
+  }
+
   return {
     name: DOMPurify.sanitize(name),
     slug: slugify(name),
     description: description ? DOMPurify.sanitize(description) : null,
-    price: toMinorUnits(Number.parseFloat(priceRaw) || 0, currency),
+    price: toMinorUnits(parsedPrice, currency),
     categoryId: categoryRaw === "none" ? null : categoryRaw,
     images,
     emoji: emoji ? DOMPurify.sanitize(emoji) : null,
     badge: badge ? DOMPurify.sanitize(badge) : null,
-    stock: Number.isFinite(parsedStock) ? parsedStock : 999,
+    stock: parsedStock,
   };
 }
 

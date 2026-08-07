@@ -20,8 +20,8 @@ import { prisma } from "@/lib/db";
  *   by middleware, so the Edge runtime never loads Prisma.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt" },
-  trustHost: true,
+  session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
+  trustHost: process.env.AUTH_TRUST_HOST === "true",
   pages: { signIn: "/login" },
   providers: [
     Credentials({
@@ -41,7 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const user = await prisma.user.findUnique({ where: { email } });
         // No user, or an account that has never set a password (OAuth-only /
         // seeded customer) → reject. Never reveal which case it was.
-        if (!user || !user.passwordHash) return null;
+        if (!user || !user.passwordHash || !user.isActive) return null;
 
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
@@ -52,6 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           role: user.role,
           tenantId: user.tenantId,
+          authVersion: user.authVersion,
         };
       },
     }),
@@ -63,6 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.role = user.role;
         token.tenantId = user.tenantId ?? null;
+        token.authVersion = user.authVersion;
         // Default active tenant: tenant admins administer their own tenant;
         // super admins start on the first tenant (if any) until they switch.
         if (user.tenantId) {
@@ -92,6 +94,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.id = token.sub ?? "";
       session.user.role = token.role as UserRole;
       session.user.tenantId = (token.tenantId as string | null) ?? null;
+      session.user.authVersion = token.authVersion as number;
       session.activeTenantId = (token.activeTenantId as string | null) ?? null;
       return session;
     },

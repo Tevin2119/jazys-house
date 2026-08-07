@@ -5,8 +5,7 @@ import { Prisma } from "@prisma/client";
 import { getAdminContext } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { assertValidTheme, resolveTheme, isHexColor, DEFAULT_THEME } from "@/lib/theme";
-
-const VALID_CURRENCIES = new Set(["gbp", "jpy", "usd", "eur", "xof"]);
+import { isSupportedCurrency } from "@/lib/utils";
 
 export async function updateTenantSettings(formData: FormData): Promise<void> {
   const { tenantId } = await getAdminContext();
@@ -33,7 +32,11 @@ export async function updateTenantSettings(formData: FormData): Promise<void> {
 
   // Currency: validate and update if provided
   const currencyRaw = String(formData.get("currency") ?? "").trim().toLowerCase();
-  const currency = VALID_CURRENCIES.has(currencyRaw) ? currencyRaw : (existing?.currency ?? "gbp");
+  const currency = isSupportedCurrency(currencyRaw) ? currencyRaw : (existing?.currency ?? "gbp");
+  if (currency !== existing?.currency) {
+    const records = await prisma.product.count({ where: { tenantId } }) + await prisma.order.count({ where: { tenantId } });
+    if (records > 0) throw new Error("Currency cannot change after products or orders exist. Create a new store or perform a reviewed migration.");
+  }
 
   try {
     await prisma.tenant.update({

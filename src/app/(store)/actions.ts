@@ -3,6 +3,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentTenant } from "@/lib/tenant";
+import { assertRateLimit } from "@/lib/rate-limit";
 
 export interface NewsletterState {
   ok: boolean;
@@ -23,6 +24,7 @@ export async function subscribeNewsletter(
   const tenant = await getCurrentTenant();
   if (!tenant) return { ok: false, error: "Store not found for this address." };
 
+  await assertRateLimit("newsletter", 5, 60_000);
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!EMAIL_RE.test(email)) {
     return { ok: false, error: "Please enter a valid email address." };

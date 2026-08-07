@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { updateOrderStatus } from "@/app/(admin)/admin/orders/actions";
-import { STATUS_LABELS, ORDER_STYLES } from "@/components/admin/status-badge";
+import { STATUS_LABELS } from "@/components/admin/status-badge";
 
 type OrderRow = {
   id: string;
@@ -45,10 +45,8 @@ const BULK_STATUSES = ["PROCESSING", "LABEL_CREATED", "SHIPPED", "IN_TRANSIT", "
 
 export function OrdersTableClient({
   orders,
-  currency,
 }: {
   orders: OrderRow[];
-  currency: string;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -58,7 +56,8 @@ export function OrdersTableClient({
   function toggle(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }

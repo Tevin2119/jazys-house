@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import type { Session } from "next-auth";
 import type { UserRole } from "@prisma/client";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 
 /**
  * Auth helpers — the surface admin pages and server actions depend on.
@@ -14,7 +15,7 @@ export type { Session };
 
 /** Roles permitted into the admin app. */
 export function isAdminRole(role: UserRole): boolean {
-  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN";
+  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "OWNER" || role === "ADMIN";
 }
 
 /** Current session, or null if unauthenticated. */
@@ -33,7 +34,15 @@ export function redirectToLogin(): never {
  */
 export async function requireAdmin(): Promise<Session> {
   const session = await getSession();
-  if (!session || !isAdminRole(session.user.role)) {
+  if (!session) {
+    redirectToLogin();
+  }
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { isActive: true, authVersion: true, role: true, memberships: { select: { role: true } } },
+  });
+  const hasAdminMembership = user?.memberships.some((membership) => isAdminRole(membership.role));
+  if (!user || !user.isActive || user.authVersion !== session.user.authVersion || (!isAdminRole(user.role) && !hasAdminMembership)) {
     redirectToLogin();
   }
   return session;
@@ -46,7 +55,11 @@ export async function requireAdmin(): Promise<Session> {
  */
 export async function requireSuperAdmin(): Promise<Session> {
   const session = await requireAdmin();
-  if (session.user.role !== "SUPER_ADMIN") {
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true, isActive: true, authVersion: true },
+  });
+  if (!user || !user.isActive || user.authVersion !== session.user.authVersion || user.role !== "SUPER_ADMIN") {
     redirect("/admin");
   }
   return session;
@@ -70,6 +83,8 @@ export interface AdminContext {
    */
   tenantId: string;
   isSuperAdmin: boolean;
+  /** Live role for this tenant, resolved from membership where present. */
+  role: UserRole;
 }
 
 /**
@@ -83,15 +98,21 @@ export interface AdminContext {
  */
 export async function getAdminContext(): Promise<AdminContext> {
   const session = await requireAdmin();
-  const isSuperAdmin = session.user.role === "SUPER_ADMIN";
-
-  const tenantId = isSuperAdmin
-    ? session.activeTenantId
-    : session.user.tenantId;
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { id: session.user.id },
+    select: { role: true, tenantId: true, memberships: { select: { tenantId: true, role: true, permissions: true } } },
+  });
+  const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const membership = !isSuperAdmin
+    ? user.memberships.find((item) => item.tenantId === session.activeTenantId) ?? user.memberships[0]
+    : undefined;
+  const tenantId = isSuperAdmin ? session.activeTenantId : membership?.tenantId ?? user.tenantId;
 
   if (!tenantId) {
     redirect("/admin/select-tenant");
   }
 
-  return { session, tenantId, isSuperAdmin };
+  const role = isSuperAdmin ? "SUPER_ADMIN" : membership?.role ?? user.role;
+  if (!isAdminRole(role)) redirectToLogin();
+  return { session, tenantId, isSuperAdmin, role };
 }

@@ -36,26 +36,20 @@ function paymentNote(status: string): string {
 export default async function ConfirmationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ session_id?: string; orderId?: string }>;
+  searchParams: Promise<{ session_id?: string }>;
 }) {
   const tenant = await getCurrentTenant();
   if (!tenant) return <NoStore />;
 
-  const { session_id: sessionId, orderId } = await searchParams;
+  const { session_id: sessionId } = await searchParams;
 
-  // Stripe redirects here with ?session_id=. Look the order up by the session id
-  // we stored at checkout, scoped to this tenant. The legacy ?orderId= path is
-  // kept as a fallback. Either way the lookup is tenant-fenced.
+  // The Stripe session ID is an opaque, provider-issued confirmation capability.
+  // Raw internal order IDs are never accepted as customer authorization.
   const order = sessionId
     ? await prisma.order.findFirst({
         where: { stripeSessionId: sessionId, tenantId: tenant.id },
         include: { items: { include: { product: true } } },
       })
-    : orderId
-      ? await prisma.order.findFirst({
-          where: { id: orderId, tenantId: tenant.id },
-          include: { items: { include: { product: true } } },
-        })
       : null;
 
   // No matching order (bad/forged session id, wrong store) → back to the cart.

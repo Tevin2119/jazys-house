@@ -47,15 +47,24 @@ export async function verifyCart(
   tenantId: string,
   lines: CartLine[],
 ): Promise<{ items: VerifiedLine[]; total: number }> {
-  if (lines.length === 0) {
+  if (lines.length === 0 || lines.length > 50) {
     return { items: [], total: 0 };
   }
+
+  const quantities = new Map<string, number>();
+  for (const line of lines) {
+    if (!Number.isSafeInteger(line.quantity) || line.quantity < 1 || line.quantity > 100) {
+      throw new Error("Invalid item quantity.");
+    }
+    quantities.set(line.productId, (quantities.get(line.productId) ?? 0) + line.quantity);
+  }
+  const normalizedLines = [...quantities].map(([productId, quantity]) => ({ productId, quantity }));
 
   const products = await prisma.product.findMany({
     where: {
       tenantId,
       deletedAt: null,
-      id: { in: lines.map((l) => l.productId) },
+      id: { in: normalizedLines.map((l) => l.productId) },
     },
     select: { id: true, name: true, price: true, stock: true },
   });
@@ -63,7 +72,7 @@ export async function verifyCart(
   const byId = new Map(products.map((p) => [p.id, p]));
   const items: VerifiedLine[] = [];
 
-  for (const line of lines) {
+  for (const line of normalizedLines) {
     const product = byId.get(line.productId);
     if (!product) {
       throw new Error(`Product not found for tenant: ${line.productId}`);
@@ -87,5 +96,8 @@ export async function verifyCart(
     0,
   );
 
+  if (!Number.isSafeInteger(total) || total < 0 || total > 2_000_000_000) {
+    throw new Error("Order total is outside supported bounds.");
+  }
   return { items, total };
 }

@@ -49,6 +49,7 @@ export function CheckoutForm({ currency }: { currency: string }) {
   const [city, setCity] = useState("");
   const [zipLoading, setZipLoading] = useState(false);
   const [zipError, setZipError] = useState("");
+  const [checkoutAttemptId] = useState(() => crypto.randomUUID());
 
   useEffect(() => {
     const sync = () => setCart(getCart());
@@ -67,11 +68,7 @@ export function CheckoutForm({ currency }: { currency: string }) {
       setRedirecting(true);
       window.location.href = state.url;
     }
-    if (state.ok && state.orderId) {
-      setRedirecting(true);
-      window.location.href = `/checkout/confirmation?orderId=${state.orderId}`;
-    }
-  }, [state.ok, state.url, state.orderId]);
+  }, [state.ok, state.url]);
 
   async function lookupPostalCode() {
     const clean = postalCode.replace(/[^0-9]/g, "");
@@ -130,6 +127,7 @@ export function CheckoutForm({ currency }: { currency: string }) {
       >
         <input type="hidden" name="cart" value={cartPayload} />
         <input type="hidden" name="paymentMethod" value={paymentMethod} />
+        <input type="hidden" name="checkoutAttemptId" value={checkoutAttemptId} />
 
         {/* ── お名前 ───────────────────────────────────────────── */}
         <section>
@@ -311,7 +309,7 @@ export function CheckoutForm({ currency }: { currency: string }) {
           </div>
           <div className="mt-1 flex justify-between">
             <span className="text-muted-foreground">送料</span>
-            <span className="text-muted-foreground">別途計算</span>
+            <span className="text-muted-foreground">無料</span>
           </div>
         </div>
       </aside>

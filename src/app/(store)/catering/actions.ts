@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { getCurrentTenant } from "@/lib/tenant";
 import { CATERING_PACKAGE_VALUES } from "@/lib/catering-packages";
+import { assertRateLimit } from "@/lib/rate-limit";
 
 export interface InquiryState {
   ok: boolean;
@@ -25,6 +26,7 @@ export async function submitCateringInquiry(
   const tenant = await getCurrentTenant();
   if (!tenant) return { ok: false, error: "Store not found for this address." };
 
+  await assertRateLimit("catering", 3, 60_000);
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const date = String(formData.get("date") ?? "").trim();
@@ -34,13 +36,13 @@ export async function submitCateringInquiry(
 
   const guests = Number.parseInt(guestsRaw, 10);
 
-  if (!name || !email || !date || !message) {
+  if (!name || !email || !date || !message || name.length > 120 || email.length > 254 || date.length > 32 || message.length > 4_000) {
     return { ok: false, error: "Please fill in all required fields." };
   }
   if (!EMAIL_RE.test(email)) {
     return { ok: false, error: "Please enter a valid email address." };
   }
-  if (!Number.isInteger(guests) || guests < 1) {
+  if (!Number.isInteger(guests) || guests < 1 || guests > 10_000) {
     return { ok: false, error: "Please enter a valid number of guests." };
   }
   if (pkg && !CATERING_PACKAGE_VALUES.includes(pkg)) {

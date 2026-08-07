@@ -101,8 +101,7 @@ While you're here, also set the other required variables documented in
 `.env.example`:
 
 - `AUTH_SECRET` — generate with `openssl rand -base64 32`
-- `SEED_ADMIN_PASSWORD` — password for the seeded admin accounts (default
-  `admin1234`, dev-only)
+- `SEED_ADMIN_PASSWORD` — explicitly set development-only password (minimum 16 characters)
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_ROOT_DOMAIN`, `DEFAULT_TENANT_SLUG`
@@ -161,8 +160,8 @@ theme, catalog subset, and owner:
 | `afrochic`   | distinct theme + catalog         |
 | `baobab`     | distinct theme + catalog         |
 
-It also creates **admin logins** (password = `SEED_ADMIN_PASSWORD`, default
-`admin1234`):
+It also creates **admin logins** (password = the explicitly supplied
+`SEED_ADMIN_PASSWORD`):
 
 | Email                   | Role          |
 | ----------------------- | ------------- |

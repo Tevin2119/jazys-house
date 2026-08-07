@@ -15,15 +15,19 @@ export async function toggleWishlist(
 
   const userId = session.user.id;
 
-  const existing = await prisma.wishlistItem.findUnique({
-    where: { userId_productId: { userId, productId } },
+  const product = await prisma.product.findFirst({
+    where: { id: productId, tenantId: tenant.id, deletedAt: null },
+    select: { id: true },
+  });
+  if (!product) throw new Error("Product not found.");
+
+  const existing = await prisma.wishlistItem.findFirst({
+    where: { userId, productId, tenantId: tenant.id },
     select: { id: true },
   });
 
   if (existing) {
-    await prisma.wishlistItem.delete({
-      where: { userId_productId: { userId, productId } },
-    });
+    await prisma.wishlistItem.deleteMany({ where: { id: existing.id, userId, tenantId: tenant.id } });
     return { wishlisted: false };
   }
 

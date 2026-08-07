@@ -21,10 +21,10 @@ export default async function EditProductPage({
   });
   if (!product) notFound();
 
-  const categories = await prisma.category.findMany({
-    where: { tenantId },
-    orderBy: { name: "asc" },
-  });
+  const [categories, tenant] = await Promise.all([
+    prisma.category.findMany({ where: { tenantId }, orderBy: { name: "asc" } }),
+    prisma.tenant.findUniqueOrThrow({ where: { id: tenantId }, select: { currency: true } }),
+  ]);
 
   return (
     <div>
@@ -32,6 +32,7 @@ export default async function EditProductPage({
       <ProductForm
         action={updateProduct}
         categories={categories}
+        currency={tenant.currency}
         product={product}
       />
     </div>

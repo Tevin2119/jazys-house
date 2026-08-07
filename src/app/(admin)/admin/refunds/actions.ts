@@ -1,44 +1,47 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { RefundStage } from "@prisma/client";
 import { getAdminContext } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-
-const STAGE_ORDER: RefundStage[] = ["REQUESTED", "APPROVED", "PROCESSING", "COMPLETED"];
-
-function nextStage(current: RefundStage): RefundStage | null {
-  const idx = STAGE_ORDER.indexOf(current);
-  return idx >= 0 && idx < STAGE_ORDER.length - 1 ? STAGE_ORDER[idx + 1] : null;
-}
+import { stripe } from "@/lib/stripe";
 
 export async function advanceRefundStage(formData: FormData): Promise<void> {
-  const { tenantId } = await getAdminContext();
+  const { tenantId, role } = await getAdminContext();
+  if (role !== "SUPER_ADMIN" && role !== "OWNER" && role !== "TENANT_ADMIN") {
+    throw new Error("Only store owners may approve refunds.");
+  }
   const refundId = String(formData.get("refundId") ?? "").trim();
-
   const refund = await prisma.refund.findFirst({
     where: { id: refundId, tenantId },
-    select: { id: true, stage: true, orderId: true },
+    include: { order: { select: { id: true, tenantId: true, total: true, currency: true, paymentStatus: true, stripePaymentIntentId: true } } },
   });
   if (!refund) throw new Error("Refund not found.");
 
-  const next = nextStage(refund.stage);
-  if (!next) throw new Error("Refund is already in the final stage.");
-
-  await prisma.$transaction(async (tx) => {
-    await tx.refund.update({
-      where: { id: refundId },
-      data:  { stage: next },
-    });
-
-    // Auto-set order to REFUNDED when refund completes
-    if (next === "COMPLETED") {
-      await tx.order.updateMany({
-        where: { id: refund.orderId, tenantId },
-        data:  { status: "REFUNDED" },
-      });
+  if (refund.stage === "REQUESTED") {
+    await prisma.refund.update({ where: { id: refund.id }, data: { stage: "APPROVED" } });
+  } else if (refund.stage === "APPROVED") {
+    if (refund.amount < 1 || refund.order.paymentStatus !== "COMPLETED" || !refund.order.stripePaymentIntentId) {
+      throw new Error("This refund is not eligible for Stripe processing.");
     }
-  });
+    const aggregate = await prisma.refund.aggregate({
+      where: { orderId: refund.orderId, tenantId, stage: { in: ["APPROVED", "PROCESSING", "COMPLETED"] }, id: { not: refund.id } },
+      _sum: { amount: true },
+    });
+    if ((aggregate._sum.amount ?? 0) + refund.amount > refund.order.total) {
+      throw new Error("Refund amount exceeds the paid order total.");
+    }
+    const providerRefund = await stripe.refunds.create({
+      payment_intent: refund.order.stripePaymentIntentId,
+      amount: refund.amount,
+      metadata: { refundId: refund.id, orderId: refund.orderId, tenantId },
+    }, { idempotencyKey: `refund:${refund.id}` });
+    await prisma.refund.update({
+      where: { id: refund.id },
+      data: { stage: providerRefund.status === "succeeded" ? "COMPLETED" : "PROCESSING", providerRefundId: providerRefund.id, providerPaymentId: refund.order.stripePaymentIntentId, failureReason: providerRefund.failure_reason ?? null },
+    });
+  } else {
+    throw new Error("This refund is awaiting Stripe confirmation or is already complete.");
+  }
 
   revalidatePath("/admin/refunds");
   revalidatePath(`/admin/orders/${refund.orderId}`);

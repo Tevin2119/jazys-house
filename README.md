@@ -45,8 +45,8 @@ Fill in `.env`:
   ```
 - `STRIPE_SECRET_KEY` (`sk_...`), `STRIPE_WEBHOOK_SECRET` (`whsec_...`),
   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (`pk_...`).
-- `SEED_ADMIN_PASSWORD` — password for the seeded admin accounts
-  (default `admin1234`, dev-only).
+- `SEED_ADMIN_PASSWORD` — an explicitly supplied development-only password of
+  at least 16 characters. Production seeding is refused unless deliberately enabled.
 
 Then apply the schema, seed demo data, and start the dev server:
 
@@ -67,7 +67,7 @@ After seeding, log in at **`/login`** with one of the seeded accounts:
 | `admin@jazyshouse.com`   | `SUPER_ADMIN`  | Platform-wide; creates/manages stores  |
 | `owner@jazyshouse.com`   | `TENANT_ADMIN` | A single store's catalog and settings  |
 
-The password for both is the value of `SEED_ADMIN_PASSWORD` (default `admin1234`).
+The password for both is the explicitly configured `SEED_ADMIN_PASSWORD` value.
 Super admins create and manage stores under **Admin → Stores**; per-store branding
 lives under **Admin → Settings**.
 
@@ -125,14 +125,15 @@ The actual Prisma lookup happens in the Node runtime inside `src/lib/tenant.ts`.
 | `npm run dev:jazyshouse` | `node scripts/dev-tenant.mjs jazyshouse`   | Dev server previewing the `jazyshouse` store on the root domain. |
 | `npm run build`          | `prisma generate && next build`            | Generate the Prisma client and build for production.         |
 | `npm run start`          | `next start`                               | Serve the production build.                                  |
-| `npm run lint`           | `next lint`                                | Run ESLint.                                                  |
+| `npm run lint`           | `eslint .`                                 | Run ESLint.                                                  |
 | `npm run typecheck`      | `tsc --noEmit`                             | Type-check without emitting.                                 |
 | `npm run db:migrate`     | `prisma migrate dev`                       | Create/apply a dev migration (keeps migration history).     |
+| `npm run db:deploy`      | `prisma migrate deploy`                    | Apply committed migrations in a controlled release.          |
 | `npm run db:push`        | `prisma db push`                           | Sync the schema to the DB without a migration (quick dev sync). |
 | `npm run db:seed`        | `tsx prisma/seed.ts`                       | Seed demo tenants + admin users (also wired as `prisma.seed`). |
 | `npm run db:studio`      | `prisma studio`                            | Open Prisma Studio.                                         |
 
-`postinstall` runs `prisma generate` automatically after `npm install`.
+`npm run build` runs `prisma generate` before the production build.
 
 ## Deployment
 
